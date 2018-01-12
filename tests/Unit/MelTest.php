@@ -4,6 +4,7 @@ namespace MelTests\Unit;
 
 use Mel\Mel;
 use Mel\MeLiApp;
+use Mel\HttpClients\ClientInterface;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 
@@ -30,5 +31,12 @@ class MelTest extends TestCase
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertTrue($mel->meLiApp()->isAnonymousClient());
+    }
+
+    public function testGetHttpClient()
+    {
+        $mel = new Mel();
+
+        $this->assertInstanceOf(ClientInterface::class, $mel->getHttpClient());
     }
 }
