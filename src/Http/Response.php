@@ -15,7 +15,7 @@ class Response extends GuzzlerResponse implements ResponseInterface
     /**
      * Response constructor.
      * @param ResponseInterface $rawResponse Raw response used to build final response object
-     * @param null              $reason      Reason phrase
+     * @param mixed             $reason      Reason phrase
      */
     public function __construct(ResponseInterface $rawResponse, $reason = null)
     {
@@ -53,7 +53,7 @@ class Response extends GuzzlerResponse implements ResponseInterface
      *
      * @param string $key
      * @param mixed  $default
-     * @return mixed|null
+     * @return mixed
      */
     public function getBodyItem($key, $default = null)
     {

@@ -3,6 +3,8 @@
 namespace Mel\HttpClients;
 
 use GuzzleHttp\Client;
+use Mel\Http\ErrorResponse;
+use Mel\Http\Response;
 use Psr\Http\Message\RequestInterface;
 
 class GuzzleHttpClient implements ClientInterface
@@ -26,8 +28,12 @@ class GuzzleHttpClient implements ClientInterface
      */
     public function sendRequest(RequestInterface $request)
     {
-        $response = $this->guzzleClient->send($request);
+        $rawResponse = $this->guzzleClient->send($request);
+        $response = new Response($rawResponse);
 
+        if (!is_null($response->getBodyItem('error'))) {
+            return new ErrorResponse($response);
+        }
 
         return $response;
     }

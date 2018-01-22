@@ -5,8 +5,7 @@ namespace MelTests\Unit\Http;
 use Mockery;
 use Mel\Http\Response;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
+use MelTests\Unit\Fixtures\FooResponse;
 
 class ResponseTest extends TestCase
 {
@@ -21,54 +20,10 @@ class ResponseTest extends TestCase
 
     public function testShouldBuildFinalResponseUsingRawResponse()
     {
-        // Arrange
-        $responseArrayFormat = [
-            'message' => 'This is a simple message',
-            'status'  => 202,
-        ];
+        $response = new Response(new FooResponse());
 
-        $responseJsonFormat = json_encode($responseArrayFormat);
-
-        $rawResponse = Mockery::mock(ResponseInterface::class);
-        $streamInterface = Mockery::mock(StreamInterface::class);
-
-        $rawResponse->shouldReceive('getStatusCode')
-            ->once()
-            ->withNoArgs()
-            ->andReturn(202);
-
-        $rawResponse->shouldReceive('getHeaders')
-            ->once()
-            ->withNoArgs()
-            ->andReturn([]);
-
-        $rawResponse->shouldReceive('getBody')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($streamInterface)
-            ->byDefault();
-
-        $rawResponse->shouldReceive('getProtocolVersion')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('1.0');
-
-        $streamInterface->shouldReceive('getContents')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($responseJsonFormat);
-
-        $rawResponse->shouldReceive('getBody')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($streamInterface);
-
-        // Act
-        $response = new Response($rawResponse);
-
-        // Assert
-        $this->assertAttributeEquals($responseArrayFormat, 'decodedBody', $response);
-        $this->assertEquals($responseArrayFormat['message'], $response->getBodyItem('message'));
-        $this->assertEquals($responseArrayFormat['status'], $response->getBodyItem('status'));
+        $this->assertAttributeEquals(FooResponse::BODY_ARRAY_FORMAT, 'decodedBody', $response);
+        $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT['message'], $response->getBodyItem('message'));
+        $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT['status'], $response->getBodyItem('status'));
     }
 }

@@ -5,8 +5,7 @@ namespace MelTests\Unit\Http;
 use Mockery;
 use Mel\Http\ErrorResponse;
 use PHPUnit\Framework\TestCase;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\StreamInterface;
+use MelTests\Unit\Fixtures\FooBarErrorResponse;
 
 class ErrorResponseTest extends TestCase
 {
@@ -21,61 +20,12 @@ class ErrorResponseTest extends TestCase
 
     public function testBuildErrorResponseUsingRawResponse()
     {
-        // Arrange
-        $responseArrayFormat = [
-            'message' => 'This is a message error',
-            'error'   => 'error_id',
-            'status'  => 502,
-            'cause'   => [
-                'first cause',
-                'second cause',
-            ],
-        ];
+        $response = new ErrorResponse(new FooBarErrorResponse());
 
-        $responseJsonFormat = json_encode($responseArrayFormat);
-
-        $rawResponse = Mockery::mock(ResponseInterface::class);
-        $streamInterface = Mockery::mock(StreamInterface::class);
-
-        $rawResponse->shouldReceive('getStatusCode')
-            ->once()
-            ->withNoArgs()
-            ->andReturn(202);
-
-        $rawResponse->shouldReceive('getHeaders')
-            ->once()
-            ->withNoArgs()
-            ->andReturn([]);
-
-        $rawResponse->shouldReceive('getBody')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($streamInterface)
-            ->byDefault();
-
-        $rawResponse->shouldReceive('getProtocolVersion')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('1.0');
-
-        $streamInterface->shouldReceive('getContents')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($responseJsonFormat);
-
-        $rawResponse->shouldReceive('getBody')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($streamInterface);
-
-        // Act
-        $response = new ErrorResponse($rawResponse);
-
-        // Assert
         $this->assertTrue($response->hasErrors());
-        $this->assertEquals($responseArrayFormat['message'], $response->getMessageError());
-        $this->assertEquals($responseArrayFormat['error'], $response->getErrorId());
-        $this->assertEquals($responseArrayFormat['status'], $response->getErrorStatus());
-        $this->assertEquals($responseArrayFormat['cause'], $response->getErrorCause());
+        $this->assertEquals(FooBarErrorResponse::BODY_ARRAY_FORMAT['message'], $response->getMessageError());
+        $this->assertEquals(FooBarErrorResponse::BODY_ARRAY_FORMAT['error'], $response->getErrorId());
+        $this->assertEquals(FooBarErrorResponse::BODY_ARRAY_FORMAT['status'], $response->getErrorStatus());
+        $this->assertEquals(FooBarErrorResponse::BODY_ARRAY_FORMAT['cause'], $response->getErrorCause());
     }
 }
