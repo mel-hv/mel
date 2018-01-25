@@ -2,6 +2,7 @@
 
 namespace MelTests\Unit\HttpClients;
 
+use Mel\Exceptions\ResponseException;
 use MelTests\Unit\Fixtures\FooBarErrorResponse;
 use MelTests\Unit\Fixtures\FooResponse;
 use Mockery;
@@ -41,7 +42,11 @@ class GuzzleHttpClientTest extends TestCase
         $this->assertInstanceOf(Response::class, $result);
     }
 
-    public function testShouldSendRequestAndReturnErrorResponseIfHasErrorMessage()
+    /**
+     * @expectedException \Mel\Exceptions\ResponseException
+     * @expectedExceptionMessage
+     */
+    public function testShouldSendRequestAndExceptionIfHasErrorMessage()
     {
         // Arrange
         $guzzleClient = Mockery::mock(Client::class);
@@ -56,10 +61,10 @@ class GuzzleHttpClientTest extends TestCase
             ->andReturn(new FooBarErrorResponse());
 
         // Act
-        $result = $melClient->sendRequest($request);
+        $melClient->sendRequest($request);
 
         // Assets
-        $this->assertInstanceOf(ErrorResponse::class, $result);
+//        $this->assertInstanceOf(ErrorResponse::class, $result);
     }
 
     public function testUseHttpMethodsToSendRequest()

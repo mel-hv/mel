@@ -24,7 +24,7 @@ class FooBarErrorResponse extends Response
         $body = json_encode(self::BODY_ARRAY_FORMAT);
 
         parent::__construct(
-            202,
+            502,
             [],
             $body,
             '1.1',

@@ -33,7 +33,7 @@ class Response extends GuzzlerResponse implements ResponseInterface
     /**
      * Convert the raw response into an array if possible
      */
-    public function decodeBody()
+    protected function decodeBody()
     {
         $this->decodedBody = json_decode($this->getBodyJson(), true);
     }
@@ -45,7 +45,7 @@ class Response extends GuzzlerResponse implements ResponseInterface
      */
     public function getBodyJson()
     {
-        return $this->getBody()->getContents();
+        return $this->getBody()->__toString();
     }
 
     /**

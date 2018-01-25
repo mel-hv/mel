@@ -3,6 +3,7 @@
 namespace Mel\HttpClients;
 
 use GuzzleHttp\Client;
+use Mel\Exceptions\ResponseException;
 use Mel\Http\ErrorResponse;
 use Mel\Http\Request;
 use Mel\Http\Response;
@@ -33,12 +34,21 @@ class GuzzleHttpClient implements ClientInterface
         $response = new Response($rawResponse);
 
         if (!is_null($response->getBodyItem('error'))) {
-            return new ErrorResponse($response);
+            throw new ResponseException(
+                new ErrorResponse($response)
+            );
         }
 
         return $response;
     }
 
+    /**
+     * Sends a GET request
+     *
+     * @param $endpoint
+     * @return Response
+     * @throws ResponseException
+     */
     public function get($endpoint)
     {
         $request = new Request('GET', $endpoint);
@@ -46,6 +56,14 @@ class GuzzleHttpClient implements ClientInterface
         return $this->sendRequest($request);
     }
 
+    /**
+     * Sends a POST request
+     *
+     * @param       $endpoint
+     * @param array $params
+     * @return Response
+     * @throws ResponseException
+     */
     public function post($endpoint, array $params)
     {
         $body = \GuzzleHttp\json_encode($params);

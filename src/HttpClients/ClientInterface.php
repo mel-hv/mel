@@ -3,7 +3,6 @@
 namespace Mel\HttpClients;
 
 use Psr\Http\Message\RequestInterface;
-use Psr\Http\Message\ResponseInterface;
 
 interface ClientInterface
 {
@@ -12,7 +11,8 @@ interface ClientInterface
      *
      * @param RequestInterface $request Request to send
      *
-     * @return ResponseInterface
+     * @return \Mel\Http\Response
+     * @throws \Mel\Exceptions\ResponseException
      */
     public function sendRequest(RequestInterface $request);
 }

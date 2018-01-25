@@ -15,7 +15,7 @@ class ErrorResponse extends Response
 
     /**
      * Get error message
-     * @return mixed
+     * @return string|null
      */
     public function getMessageError()
     {
@@ -24,7 +24,7 @@ class ErrorResponse extends Response
 
     /**
      * Get id error
-     * @return mixed
+     * @return string|null
      */
     public function getErrorId()
     {
@@ -33,7 +33,7 @@ class ErrorResponse extends Response
 
     /**
      * Get status code used to identify error
-     * @return mixed
+     * @return string|int|null
      */
     public function getErrorStatus()
     {
@@ -42,7 +42,7 @@ class ErrorResponse extends Response
 
     /**
      * Get error cause sent by Mercado Libre
-     * @return mixed
+     * @return array|null
      */
     public function getErrorCause()
     {
