@@ -11,8 +11,8 @@ interface ClientInterface
      *
      * @param RequestInterface $request Request to send
      *
+     * @param array            $options Options to configure request
      * @return \Mel\Http\Response
-     * @throws \Mel\Exceptions\ResponseException
      */
-    public function sendRequest(RequestInterface $request);
+    public function send(RequestInterface $request, $options = []);
 }

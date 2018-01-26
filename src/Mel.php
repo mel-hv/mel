@@ -3,10 +3,12 @@
 namespace Mel;
 
 use Mel\HttpClients\ClientInterface;
-use Mel\HttpClients\GuzzleHttpClient;
+use Mel\HttpClients\HttpClient;
 
 class Mel
 {
+    const VERSION = 0.1;
+
     /**
      * @var MeLiApp
      */
@@ -34,7 +36,7 @@ class Mel
      */
     protected function resolveHttpClient()
     {
-        return new GuzzleHttpClient();
+        return new HttpClient();
     }
 
     /**
