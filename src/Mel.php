@@ -2,6 +2,7 @@
 
 namespace Mel;
 
+use Mel\Exceptions\MelException;
 use Mel\HttpClients\ClientInterface;
 use Mel\HttpClients\HttpClient;
 
@@ -15,17 +16,30 @@ class Mel
     protected $meLiApp;
 
     /**
+     * @var Country
+     */
+    protected $country;
+
+    /**
      * @var ClientInterface Http client instance
      */
     protected $httpClient;
 
     /**
      * Mel constructor.
-     * @param MeLiApp $meLiApp
+     * @param MeLiApp      $meLiApp
+     * @param Country|null $country
+     * @throws \Exception
      */
-    public function __construct(MeLiApp $meLiApp = null)
+    public function __construct(MeLiApp $meLiApp = null, Country $country = null)
     {
         $this->meLiApp = $meLiApp ?: new MeLiApp(MeLiApp::ANONYMOUS_MODE);
+        $this->country = $country;
+
+        if (!$this->meLiApp()->isAnonymousClient() && !($this->country instanceof Country)) {
+            throw new MelException('Authenticated mode require a country');
+        }
+
         $this->httpClient = $this->resolveHttpClient();
     }
 
@@ -56,5 +70,15 @@ class Mel
     public function getHttpClient()
     {
         return $this->httpClient;
+    }
+
+    /**
+     * Return country object
+     *
+     * @return Country|null
+     */
+    public function country()
+    {
+        return $this->country;
     }
 }

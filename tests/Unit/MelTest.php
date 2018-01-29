@@ -2,6 +2,7 @@
 
 namespace MelTests\Unit;
 
+use Mel\Country;
 use Mel\Mel;
 use Mel\MeLiApp;
 use Mel\HttpClients\ClientInterface;
@@ -20,9 +21,16 @@ class MelTest extends TestCase
     {
         $meLiApp = Mockery::mock(MeLiApp::class);
 
-        $mel = new Mel($meLiApp);
+        $meLiApp->shouldReceive('isAnonymousClient')
+            ->once()
+            ->withNoArgs()
+            ->andReturn(false);
+
+
+        $mel = new Mel($meLiApp, new Country(Country::BRASIL));
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
+        $this->assertInstanceOf(Country::class, $mel->country());
     }
 
     public function testShouldConfigureAnonymousModeToClient()
@@ -31,6 +39,22 @@ class MelTest extends TestCase
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertTrue($mel->meLiApp()->isAnonymousClient());
+    }
+
+    /**
+     * @expectedException \Mel\Exceptions\MelException
+     * @expectedExceptionMessage Authenticated mode require a country
+     */
+    public function testTrowExceptionIfItIsNotAnonymousModeAndNotHasConfiguredCountry()
+    {
+        $meLiApp = Mockery::mock(MeLiApp::class);
+
+        $meLiApp->shouldReceive('isAnonymousClient')
+            ->once()
+            ->withNoArgs()
+            ->andReturn(false);
+
+        new Mel($meLiApp);
     }
 
     public function testGetHttpClient()
