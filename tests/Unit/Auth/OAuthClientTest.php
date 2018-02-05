@@ -9,6 +9,7 @@ use Mel\Http\OAuthResponse;
 use Mel\HttpClients\ClientInterface;
 use Mel\Mel;
 use Mel\MeLiApp;
+use MelTests\Unit\Fixtures\FooBarErrorResponse;
 use MelTests\Unit\Fixtures\FooBarOAuthResponse;
 use PHPUnit\Framework\TestCase;
 use Mockery;
@@ -143,5 +144,70 @@ class OAuthClientTest extends TestCase
 
         // Assert
         $this->assertInstanceOf(OAuthResponse::class, $response);
+    }
+
+    /**
+     * @expectedException \Mel\Exceptions\ResponseException
+     */
+    public function testThrowExceptionIfRequestTokenReturnHttpResponsWithErrors()
+    {
+        $code = 'this-is-a-code';
+
+        $clientId = 'MyAppId';
+        $secretKey = 'secret-key';
+        $redirectUri = 'my-redirect-uri.com';
+
+        $mel = Mockery::mock(Mel::class);
+        $meLiApp = Mockery::mock(MeLiApp::class);
+        $httpClient = Mockery::mock(ClientInterface::class);
+        $accessToken = Mockery::mock(AccessTokenInterface::class);
+
+        $mel->shouldReceive('meLiApp')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($meLiApp);
+
+        $mel->shouldReceive('httpClient')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($httpClient);
+
+        $mel->shouldReceive('accessToken')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($accessToken);
+
+        // MeLiApp
+        $meLiApp->shouldReceive('clientId')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($clientId);
+
+        $meLiApp->shouldReceive('secretKey')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($secretKey);
+
+        $meLiApp->shouldReceive('redirectUri')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($redirectUri);
+
+        // HttpClient
+        $httpClient->shouldReceive('sendRequest')
+            ->once()
+            ->with('POST', '/oauth/token', [
+                "grant_type"    => "authorization_code",
+                "client_id"     => $clientId,
+                "client_secret" => $secretKey,
+                "redirect_uri"  => $redirectUri,
+                "code"          => $code,
+            ])
+            ->andReturn(new FooBarErrorResponse());
+
+        // Act
+        $oAuthClient = new OAuthClient($mel);
+
+        $oAuthClient->authorize($code);
     }
 }

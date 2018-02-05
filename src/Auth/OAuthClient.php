@@ -2,9 +2,11 @@
 
 namespace Mel\Auth;
 
-use Mel\Http\OAuthResponse;
 use Mel\Mel;
 use Mel\Country;
+use Mel\Http\ErrorResponse;
+use Mel\Http\OAuthResponse;
+use Mel\Exceptions\ResponseException;
 use GuzzleHttp\Psr7\Uri;
 
 class OAuthClient
@@ -13,6 +15,7 @@ class OAuthClient
 
     /**
      * Auth url list by country
+     *
      * @var array
      */
     protected static $authUri = [
@@ -44,6 +47,7 @@ class OAuthClient
 
     /**
      * OAuthClient constructor.
+     *
      * @param Mel $mel
      */
     public function __construct(Mel $mel)
@@ -52,6 +56,11 @@ class OAuthClient
     }
 
 
+    /**
+     * Get uri used to Oauth authorization
+     *
+     * @return Uri|\Psr\Http\Message\UriInterface
+     */
     public function getOAuthUri()
     {
         $meLiApp = $this->mel->meLiApp();
@@ -66,6 +75,14 @@ class OAuthClient
         return $uri;
     }
 
+    /**
+     * Requests access token to Mercado Libre
+     *
+     * @param $code
+     *
+     * @return OAuthResponse
+     * @throws ResponseException
+     */
     public function authorize($code)
     {
         $meLiApp = $this->mel->meLiApp();
@@ -80,22 +97,29 @@ class OAuthClient
             "code"          => $code,
         ]);
 
-        $response = new OAuthResponse($rawResponse);
+        $oAuthResponse = new OAuthResponse($rawResponse);
 
-        if ($this->responseHasErrors($response)) {
-            //
+        if ($this->responseHasErrors($oAuthResponse)) {
+            throw new ResponseException(new ErrorResponse($oAuthResponse));
         }
 
-        $accessToken->setToken($response->accessToken());
-        $accessToken->setRefreshToken($response->refreshToken());
-        $accessToken->setExpiresIn($response->expiresIn());
+        $accessToken->setToken($oAuthResponse->accessToken());
+        $accessToken->setRefreshToken($oAuthResponse->refreshToken());
+        $accessToken->setExpiresIn($oAuthResponse->expiresIn());
 
-        return $response;
+        return $oAuthResponse;
 
     }
 
-    public function responseHasErrors()
+    /**
+     * Return if response has errors
+     *
+     * @param OAuthResponse $oAuthResponse
+     *
+     * @return bool
+     */
+    public function responseHasErrors(OAuthResponse $oAuthResponse)
     {
-        return false;
+        return (is_null($oAuthResponse->accessToken()) || !is_null($oAuthResponse->getBodyItem('error')));
     }
 }
