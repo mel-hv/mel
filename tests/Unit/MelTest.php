@@ -2,6 +2,7 @@
 
 namespace MelTests\Unit;
 
+use Mel\Auth\OAuthClient;
 use Mel\Country;
 use Mel\Mel;
 use Mel\MeLiApp;
@@ -17,12 +18,12 @@ class MelTest extends TestCase
         parent::tearDown();
     }
 
-    public function testShouldReturnMeLiAppInstance()
+    public function testConfigureAuthenticatedMode()
     {
         $meLiApp = Mockery::mock(MeLiApp::class);
 
         $meLiApp->shouldReceive('isAnonymousClient')
-            ->once()
+            ->twice()
             ->withNoArgs()
             ->andReturn(false);
 
@@ -31,6 +32,7 @@ class MelTest extends TestCase
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertInstanceOf(Country::class, $mel->country());
+        $this->assertInstanceOf(OAuthClient::class, $mel->OAuthClient());
     }
 
     public function testShouldConfigureAnonymousModeToClient()
@@ -39,6 +41,7 @@ class MelTest extends TestCase
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertTrue($mel->meLiApp()->isAnonymousClient());
+        $this->assertNull($mel->OAuthClient());
     }
 
     /**
@@ -61,6 +64,6 @@ class MelTest extends TestCase
     {
         $mel = new Mel();
 
-        $this->assertInstanceOf(ClientInterface::class, $mel->getHttpClient());
+        $this->assertInstanceOf(ClientInterface::class, $mel->httpClient());
     }
 }

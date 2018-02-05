@@ -85,13 +85,7 @@ class HttpClient implements ClientInterface
     }
 
     /**
-     * Build request and send
-     *
-     * @param string     $method
-     * @param string     $endpoint
-     * @param array|null $params
-     * @param array      $options
-     * @return Response
+     * @inheritdoc
      * @throws ResponseException
      */
     public function sendRequest($method, $endpoint, array $params = null, $options = [])

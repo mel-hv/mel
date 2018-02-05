@@ -2,6 +2,7 @@
 
 namespace Mel;
 
+use Mel\Auth\OAuthClient;
 use Mel\Exceptions\MelException;
 use Mel\HttpClients\ClientInterface;
 use Mel\HttpClients\HttpClient;
@@ -11,12 +12,12 @@ class Mel
     const VERSION = 0.1;
 
     /**
-     * @var MeLiApp
+     * @var MeLiApp App configurations instance
      */
     protected $meLiApp;
 
     /**
-     * @var Country
+     * @var Country Country object
      */
     protected $country;
 
@@ -24,6 +25,11 @@ class Mel
      * @var ClientInterface Http client instance
      */
     protected $httpClient;
+
+    /**
+     * @var OAuthClient Client OAuth
+     */
+    protected $oAuthClient;
 
     /**
      * Mel constructor.
@@ -41,6 +47,10 @@ class Mel
         }
 
         $this->httpClient = $this->resolveHttpClient();
+
+        if (!$this->meLiApp()->isAnonymousClient()) {
+            $this->oAuthClient = new OAuthClient($this);
+        }
     }
 
     /**
@@ -67,9 +77,20 @@ class Mel
      *
      * @return ClientInterface
      */
-    public function getHttpClient()
+    public function httpClient()
     {
         return $this->httpClient;
+    }
+
+
+    /**
+     * Return OAuth client instance
+     *
+     * @return OAuthClient
+     */
+    public function OAuthClient()
+    {
+        return $this->oAuthClient;
     }
 
     /**
@@ -81,4 +102,5 @@ class Mel
     {
         return $this->country;
     }
+
 }
