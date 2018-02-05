@@ -70,6 +70,7 @@ class OAuthClient
     {
         $meLiApp = $this->mel->meLiApp();
         $httpClient = $this->mel->httpClient();
+        $accessToken = $this->mel->accessToken();
 
         $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, [
             "grant_type"    => "authorization_code",
@@ -81,8 +82,20 @@ class OAuthClient
 
         $response = new OAuthResponse($rawResponse);
 
+        if ($this->responseHasErrors($response)) {
+            //
+        }
+
+        $accessToken->setToken($response->accessToken());
+        $accessToken->setRefreshToken($response->refreshToken());
+        $accessToken->setExpiresIn($response->expiresIn());
 
         return $response;
 
+    }
+
+    public function responseHasErrors()
+    {
+        return false;
     }
 }

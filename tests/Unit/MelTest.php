@@ -2,6 +2,7 @@
 
 namespace MelTests\Unit;
 
+use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Country;
 use Mel\Mel;
@@ -33,6 +34,7 @@ class MelTest extends TestCase
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertInstanceOf(Country::class, $mel->country());
         $this->assertInstanceOf(OAuthClient::class, $mel->OAuthClient());
+        $this->assertInstanceOf(AccessTokenInterface::class, $mel->accessToken());
     }
 
     public function testShouldConfigureAnonymousModeToClient()

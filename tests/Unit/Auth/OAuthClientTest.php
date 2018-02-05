@@ -2,6 +2,7 @@
 
 namespace MelTests\Unit\Auth;
 
+use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Country;
 use Mel\Http\OAuthResponse;
@@ -66,7 +67,6 @@ class OAuthClientTest extends TestCase
         $this->assertEquals($expected, $oAuthClient->getOAuthUri()->__toString());
     }
 
-    // TODO: add save access token test
     public function testGetAccessTokenUsingReceivedCodeAndSaveAccessTokenData()
     {
         $code = 'this-is-a-code';
@@ -78,6 +78,7 @@ class OAuthClientTest extends TestCase
         $mel = Mockery::mock(Mel::class);
         $meLiApp = Mockery::mock(MeLiApp::class);
         $httpClient = Mockery::mock(ClientInterface::class);
+        $accessToken = Mockery::mock(AccessTokenInterface::class);
 
         $mel->shouldReceive('meLiApp')
             ->once()
@@ -89,6 +90,12 @@ class OAuthClientTest extends TestCase
             ->withNoArgs()
             ->andReturn($httpClient);
 
+        $mel->shouldReceive('accessToken')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($accessToken);
+
+        // MeLiApp
         $meLiApp->shouldReceive('clientId')
             ->once()
             ->withNoArgs()
@@ -104,6 +111,7 @@ class OAuthClientTest extends TestCase
             ->withNoArgs()
             ->andReturn($redirectUri);
 
+        // HttpClient
         $httpClient->shouldReceive('sendRequest')
             ->once()
             ->with('POST', '/oauth/token', [
@@ -115,10 +123,25 @@ class OAuthClientTest extends TestCase
             ])
             ->andReturn(new FooBarOAuthResponse());
 
+        // Access Token
+        $accessToken->shouldReceive('setToken')
+            ->once()
+            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
+
+        $accessToken->shouldReceive('setRefreshToken')
+            ->once()
+            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
+
+        $accessToken->shouldReceive('setExpiresIn')
+            ->once()
+            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
+
+        // Act
         $oAuthClient = new OAuthClient($mel);
 
         $response = $oAuthClient->authorize($code);
 
+        // Assert
         $this->assertInstanceOf(OAuthResponse::class, $response);
     }
 }

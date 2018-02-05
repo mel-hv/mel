@@ -2,7 +2,10 @@
 
 namespace Mel;
 
+use Mel\Auth\AccessToken;
+use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
+use Mel\Auth\Storage\SessionStorage;
 use Mel\Exceptions\MelException;
 use Mel\HttpClients\ClientInterface;
 use Mel\HttpClients\HttpClient;
@@ -31,14 +34,24 @@ class Mel
      */
     protected $oAuthClient;
 
+
+    protected $accessToken;
+
     /**
      * Mel constructor.
-     * @param MeLiApp      $meLiApp
-     * @param Country|null $country
+     *
+     * @param MeLiApp              $meLiApp
+     * @param Country|null         $country
+     * @param AccessTokenInterface $accessToken
+     *
+     * @throws MelException
      * @throws \Exception
      */
-    public function __construct(MeLiApp $meLiApp = null, Country $country = null)
-    {
+    public function __construct(
+        MeLiApp $meLiApp = null,
+        Country $country = null,
+        AccessTokenInterface $accessToken = null
+    ) {
         $this->meLiApp = $meLiApp ?: new MeLiApp(MeLiApp::ANONYMOUS_MODE);
         $this->country = $country;
 
@@ -51,6 +64,8 @@ class Mel
         if (!$this->meLiApp()->isAnonymousClient()) {
             $this->oAuthClient = new OAuthClient($this);
         }
+
+        $this->accessToken = $accessToken ?: new AccessToken(new SessionStorage());
     }
 
     /**
@@ -65,6 +80,7 @@ class Mel
 
     /**
      * Return MeLiApp instance
+     *
      * @return MeLiApp
      */
     public function meLiApp()
@@ -103,4 +119,13 @@ class Mel
         return $this->country;
     }
 
+    /**
+     * Return access token object
+     *
+     * @return AccessTokenInterface|null
+     */
+    public function accessToken()
+    {
+        return $this->accessToken;
+    }
 }

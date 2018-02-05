@@ -23,6 +23,7 @@ class HttpClient implements ClientInterface
 
     /**
      * GuzzleHttpClient constructor.
+     *
      * @param Client|null $guzzleClient The Guzzle client
      */
     public function __construct(Client $guzzleClient = null)
@@ -34,6 +35,7 @@ class HttpClient implements ClientInterface
      * Get request options
      *
      * @param $options
+     *
      * @return array
      */
     protected function getRequestOptions($options)
@@ -103,6 +105,7 @@ class HttpClient implements ClientInterface
      *
      * @param string $endpoint
      * @param array  $options
+     *
      * @return Response
      * @throws ResponseException
      */
@@ -117,6 +120,7 @@ class HttpClient implements ClientInterface
      * @param string $endpoint
      * @param array  $params
      * @param array  $options
+     *
      * @return Response
      * @throws ResponseException
      */
@@ -131,6 +135,7 @@ class HttpClient implements ClientInterface
      * @param string $endpoint
      * @param array  $params
      * @param array  $options
+     *
      * @return Response
      * @throws ResponseException
      */
@@ -144,6 +149,7 @@ class HttpClient implements ClientInterface
      *
      * @param string $endpoint
      * @param array  $options
+     *
      * @return Response
      * @throws ResponseException
      */
