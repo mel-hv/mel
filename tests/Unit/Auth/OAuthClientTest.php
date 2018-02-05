@@ -4,12 +4,11 @@ namespace MelTests\Unit\Auth;
 
 use Mel\Auth\OAuthClient;
 use Mel\Country;
-use Mel\Http\Response;
+use Mel\Http\OAuthResponse;
 use Mel\HttpClients\ClientInterface;
 use Mel\Mel;
 use Mel\MeLiApp;
 use MelTests\Unit\Fixtures\FooBarOAuthResponse;
-use MelTests\Unit\Fixtures\FooResponse;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 
@@ -120,6 +119,6 @@ class OAuthClientTest extends TestCase
 
         $response = $oAuthClient->authorize($code);
 
-        $this->assertInstanceOf(Response::class, $response);
+        $this->assertInstanceOf(OAuthResponse::class, $response);
     }
 }

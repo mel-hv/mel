@@ -2,9 +2,8 @@
 
 namespace Mel\Auth;
 
-use Mel\Http\Response;
+use Mel\Http\OAuthResponse;
 use Mel\Mel;
-use Mel\MeLiApp;
 use Mel\Country;
 use GuzzleHttp\Psr7\Uri;
 
@@ -80,7 +79,7 @@ class OAuthClient
             "code"          => $code,
         ]);
 
-        $response = new Response($rawResponse);
+        $response = new OAuthResponse($rawResponse);
 
 
         return $response;
