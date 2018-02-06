@@ -7,7 +7,7 @@ use Mel\Auth\OAuthClient;
 use Mel\Country;
 use Mel\Mel;
 use Mel\MeLiApp;
-use Mel\HttpClients\ClientInterface;
+use Mel\Http\ClientInterface;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 

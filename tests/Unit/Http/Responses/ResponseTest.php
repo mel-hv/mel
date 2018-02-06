@@ -1,9 +1,9 @@
 <?php
 
-namespace MelTests\Unit\Http;
+namespace MelTests\Unit\Http\Responses;
 
 use Mockery;
-use Mel\Http\Response;
+use Mel\Http\Responses\Response;
 use PHPUnit\Framework\TestCase;
 use MelTests\Unit\Fixtures\FooResponse;
 

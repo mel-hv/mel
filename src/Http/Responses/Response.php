@@ -1,6 +1,6 @@
 <?php
 
-namespace Mel\Http;
+namespace Mel\Http\Responses;
 
 use GuzzleHttp\Psr7\Response as GuzzlerResponse;
 use Psr\Http\Message\ResponseInterface;

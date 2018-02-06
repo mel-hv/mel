@@ -4,8 +4,8 @@ namespace Mel\Auth;
 
 use Mel\Mel;
 use Mel\Country;
-use Mel\Http\ErrorResponse;
-use Mel\Http\OAuthResponse;
+use Mel\Http\Responses\ErrorResponse;
+use Mel\Http\Responses\OAuthResponse;
 use Mel\Exceptions\ResponseException;
 use GuzzleHttp\Psr7\Uri;
 

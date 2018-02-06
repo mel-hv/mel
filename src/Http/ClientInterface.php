@@ -1,9 +1,9 @@
 <?php
 
-namespace Mel\HttpClients;
+namespace Mel\Http;
 
 use Psr\Http\Message\RequestInterface;
-use Mel\Http\Response;
+use Mel\Http\Responses\Response;
 
 interface ClientInterface
 {

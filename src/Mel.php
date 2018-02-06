@@ -7,8 +7,8 @@ use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Auth\Storage\SessionStorage;
 use Mel\Exceptions\MelException;
-use Mel\HttpClients\ClientInterface;
-use Mel\HttpClients\HttpClient;
+use Mel\Http\ClientInterface;
+use Mel\Http\HttpClient;
 
 class Mel
 {

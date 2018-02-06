@@ -5,7 +5,7 @@ namespace MelTests\Unit\Auth;
 use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Country;
-use Mel\Http\OAuthResponse;
+use Mel\Http\Responses\OAuthResponse;
 use Mel\HttpClients\ClientInterface;
 use Mel\Mel;
 use Mel\MeLiApp;

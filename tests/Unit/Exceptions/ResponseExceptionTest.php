@@ -3,7 +3,7 @@
 namespace MelTests\Unit\Exceptions;
 
 use Mel\Exceptions\ResponseException;
-use Mel\Http\ErrorResponse;
+use Mel\Http\Responses\ErrorResponse;
 use MelTests\Unit\Fixtures\FooBarErrorResponse;
 use PHPUnit\Framework\TestCase;
 

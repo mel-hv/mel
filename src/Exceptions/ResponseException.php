@@ -2,7 +2,7 @@
 
 namespace Mel\Exceptions;
 
-use Mel\Http\ErrorResponse;
+use Mel\Http\Responses\ErrorResponse;
 
 class ResponseException extends MelException
 {

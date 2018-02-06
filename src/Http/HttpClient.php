@@ -1,11 +1,10 @@
 <?php
 
-namespace Mel\HttpClients;
+namespace Mel\Http;
 
 use Mel\Mel;
-use Mel\Http\Request;
-use Mel\Http\Response;
-use Mel\Http\ErrorResponse;
+use Mel\Http\Responses\Response;
+use Mel\Http\Responses\ErrorResponse;
 use Mel\Exceptions\ResponseException;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Uri;

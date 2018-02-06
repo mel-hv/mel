@@ -1,8 +1,8 @@
 <?php
 
-namespace MelTests\Unit\Http;
+namespace MelTests\Unit\Http\Responses;
 
-use Mel\Http\OAuthResponse;
+use Mel\Http\Responses\OAuthResponse;
 use MelTests\Unit\Fixtures\FooBarOAuthResponse;
 use PHPUnit\Framework\TestCase;
 

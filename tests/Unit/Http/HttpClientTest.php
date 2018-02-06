@@ -3,14 +3,14 @@
 namespace MelTests\Unit\HttpClients;
 
 use Mockery;
-use Mel\HttpClients\HttpClient;
+use Mel\Http\HttpClient;
 use Mel\Http\Request;
 use Mel\Mel;
 use GuzzleHttp\Client;
 use MelTests\Unit\Fixtures\FooBarErrorResponse;
 use MelTests\Unit\Fixtures\FooResponse;
 use PHPUnit\Framework\TestCase;
-use Mel\Http\Response;
+use Mel\Http\Responses\Response;
 use Psr\Http\Message\RequestInterface;
 
 class HttpClientTest extends TestCase

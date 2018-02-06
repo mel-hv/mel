@@ -1,6 +1,6 @@
 <?php
 
-namespace Mel\Http;
+namespace Mel\Http\Responses;
 
 class ErrorResponse extends Response
 {
