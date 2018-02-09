@@ -6,7 +6,7 @@ use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Country;
 use Mel\Http\Responses\OAuthResponse;
-use Mel\HttpClients\ClientInterface;
+use Mel\Http\ClientInterface;
 use Mel\Mel;
 use Mel\MeLiApp;
 use MelTests\Unit\Fixtures\FooBarErrorResponse;
@@ -149,7 +149,7 @@ class OAuthClientTest extends TestCase
     /**
      * @expectedException \Mel\Exceptions\ResponseException
      */
-    public function testThrowExceptionIfRequestTokenReturnHttpResponsWithErrors()
+    public function testThrowExceptionIfRequestTokenReturnHttpResponseWithErrors()
     {
         $code = 'this-is-a-code';
 
@@ -209,5 +209,80 @@ class OAuthClientTest extends TestCase
         $oAuthClient = new OAuthClient($mel);
 
         $oAuthClient->authorize($code);
+    }
+
+    public function testRefreshAccessToken()
+    {
+        $clientId = 'MyAppId';
+        $secretKey = 'secret-key';
+        $refreshToken = 'TG-5005b6b3e4b07e60756a3353';
+
+        $mel = Mockery::mock(Mel::class);
+        $meLiApp = Mockery::mock(MeLiApp::class);
+        $httpClient = Mockery::mock(ClientInterface::class);
+        $accessToken = Mockery::mock(AccessTokenInterface::class);
+
+        $mel->shouldReceive('meLiApp')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($meLiApp);
+
+        $mel->shouldReceive('httpClient')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($httpClient);
+
+        $mel->shouldReceive('accessToken')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($accessToken);
+
+        // MeLiApp
+        $meLiApp->shouldReceive('clientId')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($clientId);
+
+        $meLiApp->shouldReceive('secretKey')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($secretKey);
+
+        // HttpClient
+        $httpClient->shouldReceive('sendRequest')
+            ->once()
+            ->with('POST', '/oauth/token', [
+                "grant_type"    => "refresh_token",
+                "client_id"     => $clientId,
+                "client_secret" => $secretKey,
+                "refresh_token" => $refreshToken,
+            ])
+            ->andReturn(new FooBarOAuthResponse());
+
+        // Access Token
+        $accessToken->shouldReceive('getRefreshToken')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($refreshToken);
+
+        $accessToken->shouldReceive('setToken')
+            ->once()
+            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
+
+        $accessToken->shouldReceive('setRefreshToken')
+            ->once()
+            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
+
+        $accessToken->shouldReceive('setExpiresIn')
+            ->once()
+            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
+
+        // Act
+        $oAuthClient = new OAuthClient($mel);
+
+        $response = $oAuthClient->refreshAccessToken();
+
+        // Assert
+        $this->assertInstanceOf(OAuthResponse::class, $response);
     }
 }

@@ -2,19 +2,57 @@
 
 namespace MelTests\Unit\HttpClients;
 
-use Mockery;
+use Mel\Mel;
 use Mel\Http\HttpClient;
 use Mel\Http\Request;
-use Mel\Mel;
-use GuzzleHttp\Client;
+use Mel\Http\Responses\Response;
+use PHPUnit\Framework\TestCase;
 use MelTests\Unit\Fixtures\FooBarErrorResponse;
 use MelTests\Unit\Fixtures\FooResponse;
-use PHPUnit\Framework\TestCase;
-use Mel\Http\Responses\Response;
+use Mockery;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Client;
 use Psr\Http\Message\RequestInterface;
 
 class HttpClientTest extends TestCase
 {
+    /**
+     * @var \Mockery\MockInterface|\Mel\Mel
+     */
+    protected $mel;
+
+    /**
+     * @var \Mockery\MockInterface|\GuzzleHttp\Client
+     */
+    protected $guzzleClient;
+
+    /**
+     * @var \Mockery\MockInterface|\Psr\Http\Message\RequestInterface
+     */
+    protected $request;
+
+    protected function setUp()
+    {
+        $this->mel = Mockery::mock(Mel::class);
+        $this->guzzleClient = Mockery::mock(Client::class);
+        $this->request = Mockery::mock(RequestInterface::class);
+
+        $this->mel->shouldReceive('meLiApp')
+            ->between(0, 4)
+            ->withNoArgs()
+            ->andReturn(Mockery::mock(\Mel\MeLiApp::class));
+
+        $this->mel->shouldReceive('accessToken')
+            ->between(0, 4)
+            ->withNoArgs()
+            ->andReturn(Mockery::mock(\Mel\Auth\AccessTokenInterface::class));
+
+        $this->mel->shouldReceive('oAuthClient')
+            ->between(0, 4)
+            ->withNoArgs()
+            ->andReturn(Mockery::mock(\Mel\Auth\OAuthClient::class));
+    }
 
     protected function tearDown()
     {
@@ -22,34 +60,62 @@ class HttpClientTest extends TestCase
         parent::tearDown();
     }
 
-    protected function getDefaultClientOptions()
+    public function testReturnApiUri()
     {
-        return [
-            'base_uri' => (new HttpClient())->getApiUri(),
-            'http_errors' => false,
-            'headers'     => [
-                'User-Agent'   => 'MEL - ' . Mel::VERSION,
-                'Content-Type' => 'application/json',
-            ],
-        ];
+        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
+
+        $this->assertInstanceOf(Uri::class, $httpClient->getApiUri());
+        $this->assertEquals('https://api.mercadolibre.com/', $httpClient->getApiUri()->__toString());
     }
 
     public function testShouldSendRequests()
     {
         // Arrange
-        $guzzleClient = Mockery::mock(Client::class);
+        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
 
-        $request = Mockery::mock(RequestInterface::class);
-
-        $melClient = new HttpClient($guzzleClient);
-
-        $guzzleClient->shouldReceive('send')
+        $this->guzzleClient->shouldReceive('send')
             ->once()
-            ->with(Mockery::type(RequestInterface::class), $this->getDefaultClientOptions())
+            ->with(Mockery::type(RequestInterface::class), Mockery::on(function ($options) {
+
+                $stack = $options['stack'];
+                unset($options['stack']);
+
+                if (!$stack instanceof HandlerStack) {
+                    return false;
+                }
+
+                if (preg_match('/(mel_oauth_middleware)/', $stack->__toString()) !== 1) {
+                    return false;
+                }
+
+                $headers = $options['headers'];
+                unset($options['headers']);
+
+                $headersDiff = array_diff($headers, [
+                    'User-Agent'   => 'MEL - ' . Mel::VERSION,
+                    'Content-Type' => 'application/json',
+                ]);
+
+                if (count($headersDiff) !== 0) {
+                    return false;
+                }
+
+                $optionsDiff = array_diff($options, [
+                    'base_uri'    => (new HttpClient($this->mel))->getApiUri(),
+                    'http_errors' => false,
+                ]);
+
+                if (count($optionsDiff) !== 0) {
+                    return false;
+                }
+
+
+                return true;
+            }))
             ->andReturn(new FooResponse());
 
         // Act
-        $result = $melClient->send($request);
+        $result = $httpClient->send($this->request);
 
         // Assets
         $this->assertInstanceOf(Response::class, $result);
@@ -62,19 +128,16 @@ class HttpClientTest extends TestCase
     public function testShouldSendRequestAndExceptionIfHasErrorMessage()
     {
         // Arrange
-        $guzzleClient = Mockery::mock(Client::class);
 
-        $request = Mockery::mock(RequestInterface::class);
+        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
 
-        $melClient = new HttpClient($guzzleClient);
-
-        $guzzleClient->shouldReceive('send')
+        $this->guzzleClient->shouldReceive('send')
             ->once()
-            ->with(Mockery::type(RequestInterface::class), $this->getDefaultClientOptions())
+            ->with(Mockery::type(RequestInterface::class), Mockery::type('array'))
             ->andReturn(new FooBarErrorResponse());
 
         // Act
-        $melClient->send($request);
+        $httpClient->send($this->request);
     }
 
     public function testUseHttpMethodsToSendRequest()
@@ -85,13 +148,11 @@ class HttpClientTest extends TestCase
         $putRequest = null;
         $deleteRequest = null;
 
-        $guzzleClient = Mockery::mock(Client::class);
+        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
 
-        $melClient = new HttpClient($guzzleClient);
-
-        $guzzleClient->shouldReceive('send')
+        $this->guzzleClient->shouldReceive('send')
             ->times(4)
-            ->with(Mockery::type(Request::class), $this->getDefaultClientOptions())
+            ->with(Mockery::type(Request::class), Mockery::type('array'))
             ->andReturnUsing(function ($request) use (&$getRequest, &$postRequest, &$putRequest, &$deleteRequest) {
                 $method = $request->getMethod();
 
@@ -114,10 +175,10 @@ class HttpClientTest extends TestCase
             });
 
         // Act
-        $getResponse = $melClient->get('/');
-        $postResponse = $melClient->post('/', ['id' => '23', 'name' => 'Product Name']);
-        $putResponse = $melClient->put('/23', ['name' => 'Product Name']);
-        $deleteResponse = $melClient->delete('/23');
+        $getResponse = $httpClient->get('/');
+        $postResponse = $httpClient->post('/', ['id' => '23', 'name' => 'Product Name']);
+        $putResponse = $httpClient->put('/23', ['name' => 'Product Name']);
+        $deleteResponse = $httpClient->delete('/23');
 
         // Assets
         /* Assert GET */

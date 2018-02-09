@@ -36,7 +36,7 @@ class AccessToken implements AccessTokenInterface
     }
 
     /**
-     * @return string|bool
+     * {@inheritdoc}
      */
     public function getToken()
     {

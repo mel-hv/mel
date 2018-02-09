@@ -14,7 +14,7 @@ interface AccessTokenInterface
     /**
      * Get token value
      *
-     * @return string|bool
+     * @return string|null
      */
     public function getToken();
 

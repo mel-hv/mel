@@ -33,7 +33,7 @@ class MelTest extends TestCase
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertInstanceOf(Country::class, $mel->country());
-        $this->assertInstanceOf(OAuthClient::class, $mel->OAuthClient());
+        $this->assertInstanceOf(OAuthClient::class, $mel->oAuthClient());
         $this->assertInstanceOf(AccessTokenInterface::class, $mel->accessToken());
     }
 
@@ -43,7 +43,7 @@ class MelTest extends TestCase
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertTrue($mel->meLiApp()->isAnonymousClient());
-        $this->assertNull($mel->OAuthClient());
+        $this->assertNull($mel->oAuthClient());
     }
 
     /**

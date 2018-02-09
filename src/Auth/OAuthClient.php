@@ -76,6 +76,18 @@ class OAuthClient
     }
 
     /**
+     * Return if response has errors
+     *
+     * @param OAuthResponse $oAuthResponse
+     *
+     * @return bool
+     */
+    public function responseHasErrors(OAuthResponse $oAuthResponse)
+    {
+        return (is_null($oAuthResponse->accessToken()) || !is_null($oAuthResponse->getBodyItem('error')));
+    }
+
+    /**
      * Requests access token to Mercado Libre
      *
      * @param $code
@@ -108,18 +120,37 @@ class OAuthClient
         $accessToken->setExpiresIn($oAuthResponse->expiresIn());
 
         return $oAuthResponse;
-
     }
 
     /**
-     * Return if response has errors
+     * Refresh access token used to authorize request in Mercado Libre
      *
-     * @param OAuthResponse $oAuthResponse
-     *
-     * @return bool
+     * @return OAuthResponse
+     * @throws ResponseException
      */
-    public function responseHasErrors(OAuthResponse $oAuthResponse)
+    public function refreshAccessToken()
     {
-        return (is_null($oAuthResponse->accessToken()) || !is_null($oAuthResponse->getBodyItem('error')));
+        $meLiApp = $this->mel->meLiApp();
+        $httpClient = $this->mel->httpClient();
+        $accessToken = $this->mel->accessToken();
+
+        $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, [
+            "grant_type"    => "refresh_token",
+            "client_id"     => $meLiApp->clientId(),
+            "client_secret" => $meLiApp->secretKey(),
+            "refresh_token" => $accessToken->getRefreshToken(),
+        ]);
+
+        $oAuthResponse = new OAuthResponse($rawResponse);
+
+        if ($this->responseHasErrors($oAuthResponse)) {
+            throw new ResponseException(new ErrorResponse($oAuthResponse));
+        }
+
+        $accessToken->setToken($oAuthResponse->accessToken());
+        $accessToken->setRefreshToken($oAuthResponse->refreshToken());
+        $accessToken->setExpiresIn($oAuthResponse->expiresIn());
+
+        return $oAuthResponse;
     }
 }

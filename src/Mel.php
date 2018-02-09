@@ -75,7 +75,7 @@ class Mel
      */
     protected function resolveHttpClient()
     {
-        return new HttpClient();
+        return new HttpClient($this);
     }
 
     /**
@@ -104,7 +104,7 @@ class Mel
      *
      * @return OAuthClient
      */
-    public function OAuthClient()
+    public function oAuthClient()
     {
         return $this->oAuthClient;
     }

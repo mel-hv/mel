@@ -7,6 +7,8 @@ use Mel\Http\Responses\Response;
 use Mel\Http\Responses\ErrorResponse;
 use Mel\Exceptions\ResponseException;
 use GuzzleHttp\Client;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Middleware;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Psr7\UriNormalizer;
 use Psr\Http\Message\RequestInterface;
@@ -16,6 +18,11 @@ class HttpClient implements ClientInterface
     const API_URI = "https://api.mercadolibre.com";
 
     /**
+     * @var Mel A instance of the Mel
+     */
+    protected $mel;
+
+    /**
      * @var Client The Guzzle client
      */
     protected $guzzleClient;
@@ -23,11 +30,23 @@ class HttpClient implements ClientInterface
     /**
      * GuzzleHttpClient constructor.
      *
+     * @param Mel         $mel
      * @param Client|null $guzzleClient The Guzzle client
      */
-    public function __construct(Client $guzzleClient = null)
+    public function __construct(Mel $mel, Client $guzzleClient = null)
     {
+        $this->mel = $mel;
         $this->guzzleClient = $guzzleClient ?: new Client();
+    }
+
+    /**
+     * Return instance of the Uri configured using base uri of the Mercado Libre api
+     *
+     * @return \Psr\Http\Message\UriInterface
+     */
+    public function getApiUri()
+    {
+        return UriNormalizer::normalize(new Uri(self::API_URI));
     }
 
     /**
@@ -42,6 +61,7 @@ class HttpClient implements ClientInterface
         $default = [
             'base_uri'    => $this->getApiUri(),
             'http_errors' => false,
+            'stack'       => $this->resolveMiddleware(),
             'headers'     => [
                 'User-Agent'   => $this->getUserAgent(),
                 'Content-Type' => 'application/json',
@@ -51,9 +71,23 @@ class HttpClient implements ClientInterface
         return array_merge($default, $options);
     }
 
-    public function getApiUri()
+    /**
+     * Resolve Middleware dependencies
+     *
+     * @return HandlerStack
+     */
+    protected function resolveMiddleware()
     {
-        return UriNormalizer::normalize(new Uri(self::API_URI));
+        $oAuthMiddleware = new OAuthMiddleware(
+            $this->mel->meLiApp(),
+            $this->mel->accessToken(),
+            $this->mel->oAuthClient()
+        );
+
+        $stack = HandlerStack::create();
+        $stack->push(Middleware::mapRequest($oAuthMiddleware), 'mel_oauth_middleware');
+
+        return $stack;
     }
 
     /**
