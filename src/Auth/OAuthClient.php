@@ -98,10 +98,8 @@ class OAuthClient
     public function authorize($code)
     {
         $meLiApp = $this->mel->meLiApp();
-        $httpClient = $this->mel->httpClient();
-        $accessToken = $this->mel->accessToken();
 
-        $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, [
+        $oAuthResponse = $this->requestToken([
             "grant_type"    => "authorization_code",
             "client_id"     => $meLiApp->clientId(),
             "client_secret" => $meLiApp->secretKey(),
@@ -109,15 +107,7 @@ class OAuthClient
             "code"          => $code,
         ]);
 
-        $oAuthResponse = new OAuthResponse($rawResponse);
-
-        if ($this->responseHasErrors($oAuthResponse)) {
-            throw new ResponseException(new ErrorResponse($oAuthResponse));
-        }
-
-        $accessToken->setToken($oAuthResponse->accessToken());
-        $accessToken->setRefreshToken($oAuthResponse->refreshToken());
-        $accessToken->setExpiresIn($oAuthResponse->expiresIn());
+        $this->saveToken($oAuthResponse);
 
         return $oAuthResponse;
     }
@@ -131,15 +121,31 @@ class OAuthClient
     public function refreshAccessToken()
     {
         $meLiApp = $this->mel->meLiApp();
-        $httpClient = $this->mel->httpClient();
-        $accessToken = $this->mel->accessToken();
 
-        $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, [
+        $oAuthResponse = $this->requestToken([
             "grant_type"    => "refresh_token",
             "client_id"     => $meLiApp->clientId(),
             "client_secret" => $meLiApp->secretKey(),
-            "refresh_token" => $accessToken->getRefreshToken(),
+            "refresh_token" => $this->mel->accessToken()->getRefreshToken(),
         ]);
+
+        $this->saveToken($oAuthResponse);
+
+        return $oAuthResponse;
+    }
+
+    /**
+     * Send request of the access token
+     *
+     * @param array $params
+     *
+     * @return OAuthResponse
+     * @throws ResponseException
+     */
+    protected function requestToken(array $params)
+    {
+        $httpClient = $this->mel->httpClient();
+        $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, $params);
 
         $oAuthResponse = new OAuthResponse($rawResponse);
 
@@ -147,10 +153,20 @@ class OAuthClient
             throw new ResponseException(new ErrorResponse($oAuthResponse));
         }
 
+        return $oAuthResponse;
+    }
+
+    /**
+     * Save access token and others important data
+     *
+     * @param OAuthResponse $oAuthResponse
+     */
+    protected function saveToken(OAuthResponse $oAuthResponse)
+    {
+        $accessToken = $this->mel->accessToken();
+
         $accessToken->setToken($oAuthResponse->accessToken());
         $accessToken->setRefreshToken($oAuthResponse->refreshToken());
         $accessToken->setExpiresIn($oAuthResponse->expiresIn());
-
-        return $oAuthResponse;
     }
 }

@@ -34,7 +34,9 @@ class Mel
      */
     protected $oAuthClient;
 
-
+    /**
+     * @var AccessToken Access token manager
+     */
     protected $accessToken;
 
     /**
