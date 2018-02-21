@@ -38,6 +38,11 @@ class Response extends GuzzlerResponse implements ResponseInterface
         $this->decodedBody = json_decode($this->getBodyJson(), true);
     }
 
+    public function getDecodedBody()
+    {
+        return $this->decodedBody;
+    }
+
     /**
      *  Returns the remaining contents in a string
      *

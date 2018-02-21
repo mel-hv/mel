@@ -22,7 +22,7 @@ class ResponseTest extends TestCase
     {
         $response = new Response(new FooResponse());
 
-        $this->assertAttributeEquals(FooResponse::BODY_ARRAY_FORMAT, 'decodedBody', $response);
+        $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT, $response->getDecodedBody());
         $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT['message'], $response->getBodyItem('message'));
         $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT['status'], $response->getBodyItem('status'));
     }
