@@ -3,7 +3,7 @@
 namespace MelTests\Unit\Http\Responses;
 
 use Mel\Http\Responses\OAuthResponse;
-use MelTests\Unit\Fixtures\FooBarOAuthResponse;
+use MelTests\Unit\Fixtures\BarOAuthResponse;
 use PHPUnit\Framework\TestCase;
 
 class OAuthResponseTest extends TestCase
@@ -16,7 +16,7 @@ class OAuthResponseTest extends TestCase
         $refreshToken = 'TG-5005b6b3e4b07e60756a3353';
         $scope = ['write', 'read', 'offline_access'];
 
-        $oAuthResponse = new OAuthResponse(new FooBarOAuthResponse());
+        $oAuthResponse = new OAuthResponse(new BarOAuthResponse());
 
         $this->assertEquals($accessToken, $oAuthResponse->accessToken());
         $this->assertEquals($tokenType, $oAuthResponse->tokenType());

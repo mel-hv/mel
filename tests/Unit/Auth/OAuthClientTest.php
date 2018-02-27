@@ -9,8 +9,8 @@ use Mel\Http\Responses\OAuthResponse;
 use Mel\Http\ClientInterface;
 use Mel\Mel;
 use Mel\MeLiApp;
-use MelTests\Unit\Fixtures\FooBarErrorResponse;
-use MelTests\Unit\Fixtures\FooBarOAuthResponse;
+use MelTests\Unit\Fixtures\FooErrorResponse;
+use MelTests\Unit\Fixtures\BarOAuthResponse;
 use PHPUnit\Framework\TestCase;
 use Mockery;
 
@@ -128,20 +128,20 @@ class OAuthClientTest extends TestCase
                 "redirect_uri"  => $redirectUri,
                 "code"          => $code,
             ])
-            ->andReturn(new FooBarOAuthResponse());
+            ->andReturn(new BarOAuthResponse());
 
         // Access Token
         $accessToken->shouldReceive('setToken')
             ->once()
-            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
+            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
 
         $accessToken->shouldReceive('setRefreshToken')
             ->once()
-            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
+            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
 
         $accessToken->shouldReceive('setExpiresIn')
             ->once()
-            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
+            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
 
         // Act
         $oAuthClient = new OAuthClient($this->mel);
@@ -153,7 +153,7 @@ class OAuthClientTest extends TestCase
     }
 
     /**
-     * @expectedException \Mel\Exceptions\ResponseException
+     * @expectedException \Mel\Exceptions\HttpResponseException
      */
     public function testThrowExceptionIfRequestTokenReturnHttpResponseWithErrors()
     {
@@ -190,7 +190,7 @@ class OAuthClientTest extends TestCase
                 "redirect_uri"  => $redirectUri,
                 "code"          => $code,
             ])
-            ->andReturn(new FooBarErrorResponse());
+            ->andReturn(new FooErrorResponse());
 
         // Act
         $oAuthClient = new OAuthClient($this->mel);
@@ -232,7 +232,7 @@ class OAuthClientTest extends TestCase
                 "client_secret" => $secretKey,
                 "refresh_token" => $refreshToken,
             ])
-            ->andReturn(new FooBarOAuthResponse());
+            ->andReturn(new BarOAuthResponse());
 
         // Access Token
         $accessToken->shouldReceive('getRefreshToken')
@@ -242,15 +242,15 @@ class OAuthClientTest extends TestCase
 
         $accessToken->shouldReceive('setToken')
             ->once()
-            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
+            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
 
         $accessToken->shouldReceive('setRefreshToken')
             ->once()
-            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
+            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
 
         $accessToken->shouldReceive('setExpiresIn')
             ->once()
-            ->with(FooBarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
+            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
 
         // Act
         $oAuthClient = new OAuthClient($this->mel);

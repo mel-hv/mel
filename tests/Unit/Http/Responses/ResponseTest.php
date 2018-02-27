@@ -5,7 +5,7 @@ namespace MelTests\Unit\Http\Responses;
 use Mockery;
 use Mel\Http\Responses\Response;
 use PHPUnit\Framework\TestCase;
-use MelTests\Unit\Fixtures\FooResponse;
+use MelTests\Unit\Fixtures\FooBarResponse;
 
 class ResponseTest extends TestCase
 {
@@ -20,10 +20,10 @@ class ResponseTest extends TestCase
 
     public function testShouldBuildFinalResponseUsingRawResponse()
     {
-        $response = new Response(new FooResponse());
+        $response = new Response(new FooBarResponse());
 
-        $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT, $response->getDecodedBody());
-        $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT['message'], $response->getBodyItem('message'));
-        $this->assertEquals(FooResponse::BODY_ARRAY_FORMAT['status'], $response->getBodyItem('status'));
+        $this->assertEquals(FooBarResponse::BODY_ARRAY_FORMAT, $response->getDecodedBody());
+        $this->assertEquals(FooBarResponse::BODY_ARRAY_FORMAT['message'], $response->getBodyItem('message'));
+        $this->assertEquals(FooBarResponse::BODY_ARRAY_FORMAT['status'], $response->getBodyItem('status'));
     }
 }

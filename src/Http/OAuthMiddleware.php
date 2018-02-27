@@ -46,7 +46,7 @@ class OAuthMiddleware
      * @param RequestInterface $request
      *
      * @return RequestInterface
-     * @throws \Mel\Exceptions\ResponseException
+     * @throws \Mel\Exceptions\HttpResponseException
      */
     public function __invoke(RequestInterface $request)
     {

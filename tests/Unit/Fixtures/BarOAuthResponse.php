@@ -4,7 +4,7 @@ namespace MelTests\Unit\Fixtures;
 
 use GuzzleHttp\Psr7\Response;
 
-class FooBarOAuthResponse extends Response
+class BarOAuthResponse extends Response
 {
     const BODY_ARRAY_FORMAT = [
         "access_token"  => "APP_USR-6092-3246532-cb45c82853f6e620bb0deda096b128d3-8035443",

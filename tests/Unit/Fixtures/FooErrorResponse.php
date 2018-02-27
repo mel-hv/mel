@@ -4,7 +4,7 @@ namespace MelTests\Unit\Fixtures;
 
 use GuzzleHttp\Psr7\Response;
 
-class FooBarErrorResponse extends Response
+class FooErrorResponse extends Response
 {
     const BODY_ARRAY_FORMAT = [
         'message' => 'This is a message error',

@@ -7,8 +7,8 @@ use Mel\Http\HttpClient;
 use Mel\Http\Request;
 use Mel\Http\Responses\Response;
 use PHPUnit\Framework\TestCase;
-use MelTests\Unit\Fixtures\FooBarErrorResponse;
-use MelTests\Unit\Fixtures\FooResponse;
+use MelTests\Unit\Fixtures\FooErrorResponse;
+use MelTests\Unit\Fixtures\FooBarResponse;
 use Mockery;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
@@ -112,7 +112,7 @@ class HttpClientTest extends TestCase
 
                 return true;
             }))
-            ->andReturn(new FooResponse());
+            ->andReturn(new FooBarResponse());
 
         // Act
         $result = $httpClient->send($this->request);
@@ -122,7 +122,7 @@ class HttpClientTest extends TestCase
     }
 
     /**
-     * @expectedException \Mel\Exceptions\ResponseException
+     * @expectedException \Mel\Exceptions\HttpResponseException
      * @expectedExceptionMessage
      */
     public function testShouldSendRequestAndExceptionIfHasErrorMessage()
@@ -134,7 +134,7 @@ class HttpClientTest extends TestCase
         $this->guzzleClient->shouldReceive('send')
             ->once()
             ->with(Mockery::type(RequestInterface::class), Mockery::type('array'))
-            ->andReturn(new FooBarErrorResponse());
+            ->andReturn(new FooErrorResponse());
 
         // Act
         $httpClient->send($this->request);
@@ -171,7 +171,7 @@ class HttpClientTest extends TestCase
                         break;
                 }
 
-                return new FooResponse();
+                return new FooBarResponse();
             });
 
         // Act

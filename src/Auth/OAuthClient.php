@@ -6,7 +6,7 @@ use Mel\Mel;
 use Mel\Country;
 use Mel\Http\Responses\ErrorResponse;
 use Mel\Http\Responses\OAuthResponse;
-use Mel\Exceptions\ResponseException;
+use Mel\Exceptions\HttpResponseException;
 use GuzzleHttp\Psr7\Uri;
 
 class OAuthClient
@@ -93,7 +93,7 @@ class OAuthClient
      * @param $code
      *
      * @return OAuthResponse
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function authorize($code)
     {
@@ -116,7 +116,7 @@ class OAuthClient
      * Refresh access token used to authorize request in Mercado Libre
      *
      * @return OAuthResponse
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function refreshAccessToken()
     {
@@ -140,7 +140,7 @@ class OAuthClient
      * @param array $params
      *
      * @return OAuthResponse
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     protected function requestToken(array $params)
     {
@@ -150,7 +150,7 @@ class OAuthClient
         $oAuthResponse = new OAuthResponse($rawResponse);
 
         if ($this->responseHasErrors($oAuthResponse)) {
-            throw new ResponseException(new ErrorResponse($oAuthResponse));
+            throw new HttpResponseException(new ErrorResponse($oAuthResponse));
         }
 
         return $oAuthResponse;

@@ -4,7 +4,7 @@ namespace MelTests\Unit\Fixtures;
 
 use GuzzleHttp\Psr7\Response;
 
-class FooResponse extends Response
+class FooBarResponse extends Response
 {
     const BODY_ARRAY_FORMAT = [
         'message' => 'This is a simple message',

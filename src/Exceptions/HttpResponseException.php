@@ -4,7 +4,7 @@ namespace Mel\Exceptions;
 
 use Mel\Http\Responses\ErrorResponse;
 
-class ResponseException extends MelException
+class HttpResponseException extends MelException
 {
     /**
      * @var ErrorResponse Error response instance
@@ -12,7 +12,7 @@ class ResponseException extends MelException
     protected $errorResponse;
 
     /**
-     * ResponseException constructor.
+     * HttpResponseException constructor.
      * @param ErrorResponse $errorResponse
      */
     public function __construct(ErrorResponse $errorResponse)

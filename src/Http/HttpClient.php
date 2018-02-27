@@ -5,7 +5,7 @@ namespace Mel\Http;
 use Mel\Mel;
 use Mel\Http\Responses\Response;
 use Mel\Http\Responses\ErrorResponse;
-use Mel\Exceptions\ResponseException;
+use Mel\Exceptions\HttpResponseException;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
@@ -111,7 +111,7 @@ class HttpClient implements ClientInterface
         $response = new Response($rawResponse);
 
         if (!is_null($response->getBodyItem('error'))) {
-            throw new ResponseException(
+            throw new HttpResponseException(
                 new ErrorResponse($response)
             );
         }
@@ -121,7 +121,7 @@ class HttpClient implements ClientInterface
 
     /**
      * @inheritdoc
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function sendRequest($method, $endpoint, array $params = null, $options = [])
     {
@@ -140,7 +140,7 @@ class HttpClient implements ClientInterface
      * @param array  $options
      *
      * @return Response
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function get($endpoint, $options = [])
     {
@@ -155,7 +155,7 @@ class HttpClient implements ClientInterface
      * @param array  $options
      *
      * @return Response
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function post($endpoint, array $params, $options = [])
     {
@@ -170,7 +170,7 @@ class HttpClient implements ClientInterface
      * @param array  $options
      *
      * @return Response
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function put($endpoint, array $params, $options = [])
     {
@@ -184,7 +184,7 @@ class HttpClient implements ClientInterface
      * @param array  $options
      *
      * @return Response
-     * @throws ResponseException
+     * @throws HttpResponseException
      */
     public function delete($endpoint, $options = [])
     {

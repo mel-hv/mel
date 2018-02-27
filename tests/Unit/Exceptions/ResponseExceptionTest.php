@@ -2,19 +2,19 @@
 
 namespace MelTests\Unit\Exceptions;
 
-use Mel\Exceptions\ResponseException;
+use Mel\Exceptions\HttpResponseException;
 use Mel\Http\Responses\ErrorResponse;
-use MelTests\Unit\Fixtures\FooBarErrorResponse;
+use MelTests\Unit\Fixtures\FooErrorResponse;
 use PHPUnit\Framework\TestCase;
 
 class ResponseExceptionTest extends TestCase
 {
     public function testUseHttpResponseToBuildException()
     {
-        $responseBody = FooBarErrorResponse::BODY_ARRAY_FORMAT;
+        $responseBody = FooErrorResponse::BODY_ARRAY_FORMAT;
 
-        $errorResponse = new ErrorResponse(new FooBarErrorResponse());
-        $responseException = new ResponseException($errorResponse);
+        $errorResponse = new ErrorResponse(new FooErrorResponse());
+        $responseException = new HttpResponseException($errorResponse);
 
 
         $this->assertEquals($responseBody['message'], $responseException->getMessage());
