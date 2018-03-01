@@ -6,22 +6,17 @@ use Mel\Mel;
 use Mel\Http\HttpClient;
 use Mel\Http\Request;
 use Mel\Http\Responses\Response;
-use PHPUnit\Framework\TestCase;
-use MelTests\Unit\Fixtures\FooErrorResponse;
-use MelTests\Unit\Fixtures\FooBarResponse;
+use MelTests\Unit\Fixtures\Responses\FooErrorResponse;
+use MelTests\Unit\Fixtures\Responses\FooBarResponse;
 use Mockery;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Uri;
 use GuzzleHttp\Client;
 use Psr\Http\Message\RequestInterface;
+use MelTests\TestCase;
 
 class HttpClientTest extends TestCase
 {
-    /**
-     * @var \Mockery\MockInterface|\Mel\Mel
-     */
-    protected $mel;
-
     /**
      * @var \Mockery\MockInterface|\GuzzleHttp\Client
      */
@@ -34,44 +29,39 @@ class HttpClientTest extends TestCase
 
     protected function setUp()
     {
-        $this->mel = Mockery::mock(Mel::class);
+        parent::setUp();
+
         $this->guzzleClient = Mockery::mock(Client::class);
         $this->request = Mockery::mock(RequestInterface::class);
 
-        $this->mel->shouldReceive('meLiApp')
+        $this->melMock->shouldReceive('meLiApp')
             ->between(0, 4)
             ->withNoArgs()
             ->andReturn(Mockery::mock(\Mel\MeLiApp::class));
 
-        $this->mel->shouldReceive('accessToken')
+        $this->melMock->shouldReceive('accessToken')
             ->between(0, 4)
             ->withNoArgs()
             ->andReturn(Mockery::mock(\Mel\Auth\AccessTokenInterface::class));
 
-        $this->mel->shouldReceive('oAuthClient')
+        $this->melMock->shouldReceive('oAuthClient')
             ->between(0, 4)
             ->withNoArgs()
             ->andReturn(Mockery::mock(\Mel\Auth\OAuthClient::class));
     }
 
-    protected function tearDown()
-    {
-        Mockery::close();
-        parent::tearDown();
-    }
-
     public function testReturnApiUri()
     {
-        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
+        $httpClient = new HttpClient($this->melMock, $this->guzzleClient);
 
         $this->assertInstanceOf(Uri::class, $httpClient->getApiUri());
-        $this->assertEquals('https://api.mercadolibre.com/', $httpClient->getApiUri()->__toString());
+        $this->assertEquals($this->apiUri, $httpClient->getApiUri()->__toString());
     }
 
     public function testShouldSendRequests()
     {
         // Arrange
-        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
+        $httpClient = new HttpClient($this->melMock, $this->guzzleClient);
 
         $this->guzzleClient->shouldReceive('send')
             ->once()
@@ -101,7 +91,7 @@ class HttpClientTest extends TestCase
                 }
 
                 $optionsDiff = array_diff($options, [
-                    'base_uri'    => (new HttpClient($this->mel))->getApiUri(),
+                    'base_uri'    => (new HttpClient($this->melMock))->getApiUri(),
                     'http_errors' => false,
                 ]);
 
@@ -129,7 +119,7 @@ class HttpClientTest extends TestCase
     {
         // Arrange
 
-        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
+        $httpClient = new HttpClient($this->melMock, $this->guzzleClient);
 
         $this->guzzleClient->shouldReceive('send')
             ->once()
@@ -140,68 +130,48 @@ class HttpClientTest extends TestCase
         $httpClient->send($this->request);
     }
 
-    public function testUseHttpMethodsToSendRequest()
+    /**
+     * @dataProvider requestData
+     */
+    public function testUseHttpMethodsToSendRequest($httpMethod, $uri, $requestOptions = null)
     {
-        // Arrange
-        $getRequest = null;
-        $postRequest = null;
-        $putRequest = null;
-        $deleteRequest = null;
+        $httpClient = new HttpClient($this->melMock, $this->guzzleClient);
 
-        $httpClient = new HttpClient($this->mel, $this->guzzleClient);
+        $request = null;
 
         $this->guzzleClient->shouldReceive('send')
-            ->times(4)
+            ->once()
             ->with(Mockery::type(Request::class), Mockery::type('array'))
-            ->andReturnUsing(function ($request) use (&$getRequest, &$postRequest, &$putRequest, &$deleteRequest) {
-                $method = $request->getMethod();
+            ->andReturnUsing(function ($rawRequest) use (&$request) {
 
-                switch ($method) {
-                    case 'GET':
-                        $getRequest = $request;
-                        break;
-                    case 'POST':
-                        $postRequest = $request;
-                        break;
-                    case 'PUT':
-                        $putRequest = $request;
-                        break;
-                    case 'DELETE':
-                        $deleteRequest = $request;
-                        break;
-                }
+                $request = $rawRequest;
 
                 return new FooBarResponse();
             });
 
         // Act
-        $getResponse = $httpClient->get('/');
-        $postResponse = $httpClient->post('/', ['id' => '23', 'name' => 'Product Name']);
-        $putResponse = $httpClient->put('/23', ['name' => 'Product Name']);
-        $deleteResponse = $httpClient->delete('/23');
+        $method = mb_strtolower($httpMethod);
+
+        if(is_null($requestOptions)) {
+            $response = $httpClient->{$method}($uri);
+        } else {
+            $response = $httpClient->{$method}($uri, $requestOptions);
+        }
 
         // Assets
-        /* Assert GET */
-        $this->assertInstanceOf(Response::class, $getResponse);
-        $this->assertEquals('GET', $getRequest->getMethod());
-        $this->assertEquals('/', $getRequest->getUri());
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals($httpMethod, $request->getMethod());
+        $this->assertEquals($uri, $request->getUri());
+    }
 
-        /* Assert POST */
-        $this->assertInstanceOf(Response::class, $postResponse);
-        $this->assertEquals('POST', $postRequest->getMethod());
-        $this->assertEquals('/', $postRequest->getUri());
-        $this->assertEquals('{"id":"23","name":"Product Name"}', $postRequest->getBody()->getContents());
-
-        /* Assert PUT */
-        $this->assertInstanceOf(Response::class, $putResponse);
-        $this->assertEquals('PUT', $putRequest->getMethod());
-        $this->assertEquals('/23', $putRequest->getUri());
-        $this->assertEquals('{"name":"Product Name"}', $putRequest->getBody()->getContents());
-
-        /* Assert DELETE */
-        $this->assertInstanceOf(Response::class, $deleteResponse);
-        $this->assertEquals('DELETE', $deleteRequest->getMethod());
-        $this->assertEquals('/23', $deleteRequest->getUri());
+    public function requestData()
+    {
+        return [
+            ['GET', '/'],
+            ['POST', '/', ['id' => '23', 'name' => 'Product Name']],
+            ['PUT', '/42', ['name' => 'Product Name']],
+            ['DELETE', '/42'],
+        ];
     }
 }
 

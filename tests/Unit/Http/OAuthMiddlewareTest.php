@@ -2,27 +2,19 @@
 
 namespace MelTests\Unit\Http;
 
+use Mel\Http\OAuthMiddleware;
 use Mel\Auth\AccessToken;
 use Mel\Auth\OAuthClient;
 use Mel\MeLiApp;
 use MelTests\Unit\Fixtures\FooBarRequest;
-use Mockery;
-use Mel\Http\OAuthMiddleware;
-use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
+use MelTests\TestCase;
+use Mockery;
 
 class OAuthMiddlewareTest extends TestCase
 {
-    protected function tearDown()
-    {
-        Mockery::close();
-        parent::tearDown();
-    }
-
     public function testShouldAddTokenToRequestUri()
     {
-        $accessTokenString = 'APP_USR-6092-3246532-cb45c82853f6e620bb0deda096b128d3-8035443';
-
         $meLiApp = Mockery::mock(MeLiApp::class);
 
         $accessToken = Mockery::mock(AccessToken::class);
@@ -49,7 +41,7 @@ class OAuthMiddlewareTest extends TestCase
         $accessToken->shouldReceive('getToken')
             ->once()
             ->withNoArgs()
-            ->andReturn($accessTokenString);
+            ->andReturn($this->accessToken);
 
         $oAuthClient->shouldReceive('refreshAccessToken')
             ->once()
@@ -59,7 +51,7 @@ class OAuthMiddlewareTest extends TestCase
 
         $this->assertInstanceOf(RequestInterface::class, $finalRequest);
         $this->assertEquals(
-            sprintf('https://api.mercadolibre.com/?access_token=%1$s', $accessTokenString),
+            sprintf('%1$s?access_token=%2$s', $this->apiUri, $this->accessToken),
             $finalRequest->getUri()->__toString()
         );
     }

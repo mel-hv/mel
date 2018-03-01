@@ -8,17 +8,11 @@ use Mel\Country;
 use Mel\Mel;
 use Mel\MeLiApp;
 use Mel\Http\ClientInterface;
-use PHPUnit\Framework\TestCase;
+use MelTests\TestCase;
 use Mockery;
 
 class MelTest extends TestCase
 {
-    protected function tearDown()
-    {
-        Mockery::close();
-        parent::tearDown();
-    }
-
     public function testConfigureAuthenticatedMode()
     {
         $meLiApp = Mockery::mock(MeLiApp::class);

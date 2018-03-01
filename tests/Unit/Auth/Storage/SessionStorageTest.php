@@ -3,7 +3,7 @@
 namespace MelTests\Unit\Auth\Storage;
 
 use Mel\Auth\Storage\SessionStorage;
-use PHPUnit\Framework\TestCase;
+use MelTests\TestCase;
 
 class SessionStorageTest extends TestCase
 {

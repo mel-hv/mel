@@ -3,7 +3,7 @@
 namespace MelTests\Unit;
 
 use Mel\Country;
-use PHPUnit\Framework\TestCase;
+use MelTests\TestCase;
 
 class CountryTest extends TestCase
 {
@@ -15,11 +15,12 @@ class CountryTest extends TestCase
         $this->assertEquals('Brasil', $country->name());
     }
 
+    /**
+     * @expectedException \Mel\Exceptions\MelException
+     * @expectedExceptionMessage Use a valid Country. See: https://api.mercadolibre.com/sites/
+     */
     public function testThrowExceptionIfCountryIsInvalid()
     {
-        $this->expectException(\Mel\Exceptions\MelException::class);
-        $this->expectExceptionMessage('Use a valid Country. See: https://api.mercadolibre.com/sites/');
-
         new Country('InvalidCountry');
     }
 }

@@ -2,30 +2,21 @@
 
 namespace MelTests\Unit\Http\Responses;
 
-use Mockery;
 use Mel\Http\Responses\ErrorResponse;
-use PHPUnit\Framework\TestCase;
-use MelTests\Unit\Fixtures\FooErrorResponse;
+use MelTests\TestCase;
+use MelTests\Unit\Fixtures\Responses\FooErrorResponse;
 
 class ErrorResponseTest extends TestCase
 {
-    /**
-     * @inheritDoc
-     */
-    protected function tearDown()
-    {
-        parent::tearDown();
-        Mockery::close();
-    }
-
     public function testBuildErrorResponseUsingRawResponse()
     {
+        $bodyResponse = (object)FooErrorResponse::BODY_ARRAY_FORMAT;
         $response = new ErrorResponse(new FooErrorResponse());
 
         $this->assertTrue($response->hasErrors());
-        $this->assertEquals(FooErrorResponse::BODY_ARRAY_FORMAT['message'], $response->getMessageError());
-        $this->assertEquals(FooErrorResponse::BODY_ARRAY_FORMAT['error'], $response->getErrorId());
-        $this->assertEquals(FooErrorResponse::BODY_ARRAY_FORMAT['status'], $response->getErrorStatus());
-        $this->assertEquals(FooErrorResponse::BODY_ARRAY_FORMAT['cause'], $response->getErrorCause());
+        $this->assertEquals($bodyResponse->message, $response->getMessageError());
+        $this->assertEquals($bodyResponse->error, $response->getErrorId());
+        $this->assertEquals($bodyResponse->status, $response->getErrorStatus());
+        $this->assertEquals($bodyResponse->cause, $response->getErrorCause());
     }
 }

@@ -3,21 +3,17 @@
 namespace MelTests\Unit;
 
 use Mel\MeLiApp;
-use PHPUnit\Framework\TestCase;
+use MelTests\TestCase;
 
 class MeLiAppTest extends TestCase
 {
     public function testShouldSaveMercadoLibreAppSettings()
     {
-        $appId = 'app-id';
-        $secretKey = 'secret-key';
-        $redirectUri = 'http://redirect-uri.com/callback.php';
+        $meLiApp = new MeLiApp($this->appId, $this->secretKey, $this->redirectUri);
 
-        $meLiApp = new MeLiApp($appId, $secretKey, $redirectUri);
-
-        $this->assertEquals($appId, $meLiApp->clientId());
-        $this->assertEquals($secretKey, $meLiApp->secretKey());
-        $this->assertEquals($redirectUri, $meLiApp->redirectUri());
+        $this->assertEquals($this->appId, $meLiApp->clientId());
+        $this->assertEquals($this->secretKey, $meLiApp->secretKey());
+        $this->assertEquals($this->redirectUri, $meLiApp->redirectUri());
     }
 
     /**

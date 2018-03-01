@@ -2,62 +2,51 @@
 
 namespace MelTests\Unit\Auth;
 
-use Mockery;
-use PHPUnit\Framework\TestCase;
 use Mel\Auth\AccessToken;
 use Mel\Auth\Storage\StorageInterface;
+use MelTests\TestCase;
+use Mockery;
 
 class AccessTokenTest extends TestCase
 {
-    protected function tearDown()
-    {
-        parent::tearDown();
-        Mockery::close();
-    }
-
-
     public function testShouldSetToken()
     {
-        $token = 'token-value';
-
         $storage = Mockery::mock(StorageInterface::class);
 
         $storage->shouldReceive('set')
             ->once()
-            ->with('access_token', $token);
+            ->with('access_token', $this->accessToken);
 
         $storage->shouldReceive('get')
             ->once()
             ->with('access_token')
-            ->andReturn($token);
+            ->andReturn($this->accessToken);
 
 
         $accessToken = new AccessToken($storage);
-        $accessToken->setToken($token);
+        $accessToken->setToken($this->accessToken);
 
-        $this->assertEquals($token, $accessToken->getToken());
+        $this->assertEquals($this->accessToken, $accessToken->getToken());
     }
 
     public function testShouldSetRefreshToken()
     {
-        $refreshToken = 'refresh-token-value';
-
         $storage = Mockery::mock(StorageInterface::class);
 
         $storage->shouldReceive('set')
             ->once()
-            ->with('refresh_token', $refreshToken);
+            ->with('refresh_token', $this->refreshToken);
 
         $storage->shouldReceive('get')
             ->once()
             ->with('refresh_token')
-            ->andReturn($refreshToken);
+            ->andReturn($this->refreshToken);
 
 
         $accessToken = new AccessToken($storage);
-        $accessToken->setRefreshToken($refreshToken);
+        $accessToken->setRefreshToken($this->refreshToken);
 
-        $this->assertEquals($refreshToken, $accessToken->getRefreshToken());
+        $this->assertEquals($this->refreshToken, $accessToken->getRefreshToken());
     }
 
     public function testShouldSaveTimeToExpire()

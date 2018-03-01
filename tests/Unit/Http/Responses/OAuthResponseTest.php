@@ -3,25 +3,22 @@
 namespace MelTests\Unit\Http\Responses;
 
 use Mel\Http\Responses\OAuthResponse;
-use MelTests\Unit\Fixtures\BarOAuthResponse;
-use PHPUnit\Framework\TestCase;
+use MelTests\Unit\Fixtures\Responses\BarOAuthResponse;
+use MelTests\TestCase;
 
 class OAuthResponseTest extends TestCase
 {
     public function testResponseReturnTokenData()
     {
-        $accessToken = 'APP_USR-6092-3246532-cb45c82853f6e620bb0deda096b128d3-8035443';
-        $tokenType = 'bearer';
-        $expiresIn = 10800;
-        $refreshToken = 'TG-5005b6b3e4b07e60756a3353';
-        $scope = ['write', 'read', 'offline_access'];
+        $responseBody = (object)BarOAuthResponse::BODY_ARRAY_FORMAT;
+        $responseBody->scope = explode(' ', $responseBody->scope);
 
         $oAuthResponse = new OAuthResponse(new BarOAuthResponse());
 
-        $this->assertEquals($accessToken, $oAuthResponse->accessToken());
-        $this->assertEquals($tokenType, $oAuthResponse->tokenType());
-        $this->assertEquals($expiresIn, $oAuthResponse->expiresIn());
-        $this->assertEquals($refreshToken, $oAuthResponse->refreshToken());
-        $this->assertEquals($scope, $oAuthResponse->scope());
+        $this->assertEquals($responseBody->access_token, $oAuthResponse->accessToken());
+        $this->assertEquals($responseBody->token_type, $oAuthResponse->tokenType());
+        $this->assertEquals($responseBody->expires_in, $oAuthResponse->expiresIn());
+        $this->assertEquals($responseBody->refresh_token, $oAuthResponse->refreshToken());
+        $this->assertEquals($responseBody->scope, $oAuthResponse->scope());
     }
 }

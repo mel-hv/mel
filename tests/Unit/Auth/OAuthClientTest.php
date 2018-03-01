@@ -2,41 +2,31 @@
 
 namespace MelTests\Unit\Auth;
 
-use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
+use Mel\Auth\AccessTokenInterface;
 use Mel\Country;
 use Mel\Http\Responses\OAuthResponse;
 use Mel\Http\ClientInterface;
-use Mel\Mel;
 use Mel\MeLiApp;
-use MelTests\Unit\Fixtures\FooErrorResponse;
-use MelTests\Unit\Fixtures\BarOAuthResponse;
-use PHPUnit\Framework\TestCase;
+use MelTests\Unit\Fixtures\Responses\FooErrorResponse;
+use MelTests\Unit\Fixtures\Responses\BarOAuthResponse;
+use MelTests\TestCase;
 use Mockery;
 
 class OAuthClientTest extends TestCase
 {
-    /**
-     * @var string
-     */
-    protected $clientId = 'MyAppId';
-
-    /**
-     * @var \Mockery\MockInterface|\Mel\Mel
-     */
-    protected $mel;
-
-    /**
+     /**
      * @var \Mockery\MockInterface|\Mel\MeLiApp
      */
     protected $meLiApp;
 
     protected function setUp()
     {
-        $this->mel = Mockery::mock(Mel::class);
+        parent::setUp();
+
         $this->meLiApp = Mockery::mock(MeLiApp::class);
 
-        $this->mel->shouldReceive('meLiApp')
+        $this->melMock->shouldReceive('meLiApp')
             ->once()
             ->withNoArgs()
             ->andReturn($this->meLiApp);
@@ -44,24 +34,14 @@ class OAuthClientTest extends TestCase
         $this->meLiApp->shouldReceive('clientId')
             ->once()
             ->withNoArgs()
-            ->andReturn($this->clientId);
+            ->andReturn($this->appId);
     }
-
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-        Mockery::close();
-    }
-
 
     public function testReturnLinkUsedToAuthorizeUser()
     {
-        $redirectUri = 'my-redirect-uri.com';
-
         $country = Mockery::mock(Country::class);
 
-        $this->mel->shouldReceive('country')
+        $this->melMock->shouldReceive('country')
             ->once()
             ->withNoArgs()
             ->andReturn($country);
@@ -69,19 +49,19 @@ class OAuthClientTest extends TestCase
         $this->meLiApp->shouldReceive('redirectUri')
             ->once()
             ->withNoArgs()
-            ->andReturn($redirectUri);
+            ->andReturn($this->redirectUri);
 
         $country->shouldReceive('id')
             ->once()
             ->withNoArgs()
             ->andReturn('MLB');
 
-        $oAuthClient = new OAuthClient($this->mel);
+        $oAuthClient = new OAuthClient($this->melMock);
 
         $expected = sprintf(
             'https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=%1$s&redirect_uri=%2$s',
-            $this->clientId,
-            $redirectUri
+            $this->appId,
+            $this->redirectUri
         );
 
         $this->assertEquals($expected, $oAuthClient->getOAuthUri()->__toString());
@@ -91,18 +71,15 @@ class OAuthClientTest extends TestCase
     {
         $code = 'this-is-a-code';
 
-        $secretKey = 'secret-key';
-        $redirectUri = 'my-redirect-uri.com';
-
         $httpClient = Mockery::mock(ClientInterface::class);
         $accessToken = Mockery::mock(AccessTokenInterface::class);
 
-        $this->mel->shouldReceive('httpClient')
+        $this->melMock->shouldReceive('httpClient')
             ->once()
             ->withNoArgs()
             ->andReturn($httpClient);
 
-        $this->mel->shouldReceive('accessToken')
+        $this->melMock->shouldReceive('accessToken')
             ->once()
             ->withNoArgs()
             ->andReturn($accessToken);
@@ -111,21 +88,21 @@ class OAuthClientTest extends TestCase
         $this->meLiApp->shouldReceive('secretKey')
             ->once()
             ->withNoArgs()
-            ->andReturn($secretKey);
+            ->andReturn($this->secretKey);
 
         $this->meLiApp->shouldReceive('redirectUri')
             ->once()
             ->withNoArgs()
-            ->andReturn($redirectUri);
+            ->andReturn($this->redirectUri);
 
         // HttpClient
         $httpClient->shouldReceive('sendRequest')
             ->once()
             ->with('POST', '/oauth/token', [
                 "grant_type"    => "authorization_code",
-                "client_id"     => $this->clientId,
-                "client_secret" => $secretKey,
-                "redirect_uri"  => $redirectUri,
+                "client_id"     => $this->appId,
+                "client_secret" => $this->secretKey,
+                "redirect_uri"  => $this->redirectUri,
                 "code"          => $code,
             ])
             ->andReturn(new BarOAuthResponse());
@@ -144,7 +121,7 @@ class OAuthClientTest extends TestCase
             ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
 
         // Act
-        $oAuthClient = new OAuthClient($this->mel);
+        $oAuthClient = new OAuthClient($this->melMock);
 
         $response = $oAuthClient->authorize($code);
 
@@ -159,12 +136,9 @@ class OAuthClientTest extends TestCase
     {
         $code = 'this-is-a-code';
 
-        $secretKey = 'secret-key';
-        $redirectUri = 'my-redirect-uri.com';
-
         $httpClient = Mockery::mock(ClientInterface::class);
 
-        $this->mel->shouldReceive('httpClient')
+        $this->melMock->shouldReceive('httpClient')
             ->once()
             ->withNoArgs()
             ->andReturn($httpClient);
@@ -173,46 +147,42 @@ class OAuthClientTest extends TestCase
         $this->meLiApp->shouldReceive('secretKey')
             ->once()
             ->withNoArgs()
-            ->andReturn($secretKey);
+            ->andReturn($this->secretKey);
 
         $this->meLiApp->shouldReceive('redirectUri')
             ->once()
             ->withNoArgs()
-            ->andReturn($redirectUri);
+            ->andReturn($this->redirectUri);
 
         // HttpClient
         $httpClient->shouldReceive('sendRequest')
             ->once()
             ->with('POST', '/oauth/token', [
                 "grant_type"    => "authorization_code",
-                "client_id"     => $this->clientId,
-                "client_secret" => $secretKey,
-                "redirect_uri"  => $redirectUri,
+                "client_id"     => $this->appId,
+                "client_secret" => $this->secretKey,
+                "redirect_uri"  => $this->redirectUri,
                 "code"          => $code,
             ])
             ->andReturn(new FooErrorResponse());
 
         // Act
-        $oAuthClient = new OAuthClient($this->mel);
+        $oAuthClient = new OAuthClient($this->melMock);
 
         $oAuthClient->authorize($code);
     }
 
     public function testRefreshAccessToken()
     {
-        $secretKey = 'secret-key';
-        $refreshToken = 'TG-5005b6b3e4b07e60756a3353';
-
         $httpClient = Mockery::mock(ClientInterface::class);
         $accessToken = Mockery::mock(AccessTokenInterface::class);
 
-
-        $this->mel->shouldReceive('httpClient')
+        $this->melMock->shouldReceive('httpClient')
             ->once()
             ->withNoArgs()
             ->andReturn($httpClient);
 
-        $this->mel->shouldReceive('accessToken')
+        $this->melMock->shouldReceive('accessToken')
             ->twice()
             ->withNoArgs()
             ->andReturn($accessToken);
@@ -221,16 +191,16 @@ class OAuthClientTest extends TestCase
         $this->meLiApp->shouldReceive('secretKey')
             ->once()
             ->withNoArgs()
-            ->andReturn($secretKey);
+            ->andReturn($this->secretKey);
 
         // HttpClient
         $httpClient->shouldReceive('sendRequest')
             ->once()
             ->with('POST', '/oauth/token', [
                 "grant_type"    => "refresh_token",
-                "client_id"     => $this->clientId,
-                "client_secret" => $secretKey,
-                "refresh_token" => $refreshToken,
+                "client_id"     => $this->appId,
+                "client_secret" => $this->secretKey,
+                "refresh_token" => $this->refreshToken,
             ])
             ->andReturn(new BarOAuthResponse());
 
@@ -238,7 +208,7 @@ class OAuthClientTest extends TestCase
         $accessToken->shouldReceive('getRefreshToken')
             ->once()
             ->withNoArgs()
-            ->andReturn($refreshToken);
+            ->andReturn($this->refreshToken);
 
         $accessToken->shouldReceive('setToken')
             ->once()
@@ -253,7 +223,7 @@ class OAuthClientTest extends TestCase
             ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
 
         // Act
-        $oAuthClient = new OAuthClient($this->mel);
+        $oAuthClient = new OAuthClient($this->melMock);
 
         $response = $oAuthClient->refreshAccessToken();
 
