@@ -30,11 +30,6 @@ class OAuthClientTest extends TestCase
             ->once()
             ->withNoArgs()
             ->andReturn($this->meLiApp);
-
-        $this->meLiApp->shouldReceive('clientId')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->appId);
     }
 
     public function testReturnLinkUsedToAuthorizeUser()
@@ -45,6 +40,11 @@ class OAuthClientTest extends TestCase
             ->once()
             ->withNoArgs()
             ->andReturn($country);
+
+        $this->meLiApp->shouldReceive('clientId')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($this->appId);
 
         $this->meLiApp->shouldReceive('redirectUri')
             ->once()
@@ -85,6 +85,11 @@ class OAuthClientTest extends TestCase
             ->andReturn($accessToken);
 
         // MeLiApp
+        $this->meLiApp->shouldReceive('clientId')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($this->appId);
+
         $this->meLiApp->shouldReceive('secretKey')
             ->once()
             ->withNoArgs()
@@ -144,6 +149,11 @@ class OAuthClientTest extends TestCase
             ->andReturn($httpClient);
 
         // MeLiApp
+        $this->meLiApp->shouldReceive('clientId')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($this->appId);
+
         $this->meLiApp->shouldReceive('secretKey')
             ->once()
             ->withNoArgs()
@@ -172,6 +182,16 @@ class OAuthClientTest extends TestCase
         $oAuthClient->authorize($code);
     }
 
+    /**
+     * @expectedException \Mel\Exceptions\MelException
+     */
+    public function testThrowExceptionsIfCodeUsedToAuthIsInvalid()
+    {
+        $oAuthClient = new OAuthClient($this->melMock);
+
+        $oAuthClient->authorize();
+    }
+
     public function testRefreshAccessToken()
     {
         $httpClient = Mockery::mock(ClientInterface::class);
@@ -188,6 +208,11 @@ class OAuthClientTest extends TestCase
             ->andReturn($accessToken);
 
         // MeLiApp
+        $this->meLiApp->shouldReceive('clientId')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($this->appId);
+
         $this->meLiApp->shouldReceive('secretKey')
             ->once()
             ->withNoArgs()

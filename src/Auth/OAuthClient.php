@@ -2,6 +2,7 @@
 
 namespace Mel\Auth;
 
+use Mel\Exceptions\MelException;
 use Mel\Mel;
 use Mel\Country;
 use Mel\Http\Responses\ErrorResponse;
@@ -46,6 +47,11 @@ class OAuthClient
     protected $mel;
 
     /**
+     * @var \Mel\MeLiApp MeLiApp instance
+     */
+    protected $meLiApp;
+
+    /**
      * OAuthClient constructor.
      *
      * @param Mel $mel
@@ -53,6 +59,7 @@ class OAuthClient
     public function __construct(Mel $mel)
     {
         $this->mel = $mel;
+        $this->meLiApp = $mel->meLiApp();
     }
 
 
@@ -63,14 +70,13 @@ class OAuthClient
      */
     public function getOAuthUri()
     {
-        $meLiApp = $this->mel->meLiApp();
         $country = $this->mel->country();
 
         $uri = new Uri(self::$authUri[$country->id()] . '/authorization');
 
         $uri = Uri::withQueryValue($uri, 'response_type', 'code');
-        $uri = Uri::withQueryValue($uri, 'client_id', $meLiApp->clientId());
-        $uri = Uri::withQueryValue($uri, 'redirect_uri', $meLiApp->redirectUri());
+        $uri = Uri::withQueryValue($uri, 'client_id', $this->meLiApp->clientId());
+        $uri = Uri::withQueryValue($uri, 'redirect_uri', $this->meLiApp->redirectUri());
 
         return $uri;
     }
@@ -94,16 +100,21 @@ class OAuthClient
      *
      * @return OAuthResponse
      * @throws HttpResponseException
+     * @throws MelException
      */
-    public function authorize($code)
+    public function authorize($code = null)
     {
-        $meLiApp = $this->mel->meLiApp();
+        $code = is_string($code) ? $code : filter_input(INPUT_GET, 'code');
+
+        if (!$code) {
+            throw new MelException('Use a valid code');
+        }
 
         $oAuthResponse = $this->requestToken([
             "grant_type"    => "authorization_code",
-            "client_id"     => $meLiApp->clientId(),
-            "client_secret" => $meLiApp->secretKey(),
-            "redirect_uri"  => $meLiApp->redirectUri(),
+            "client_id"     => $this->meLiApp->clientId(),
+            "client_secret" => $this->meLiApp->secretKey(),
+            "redirect_uri"  => $this->meLiApp->redirectUri(),
             "code"          => $code,
         ]);
 
@@ -120,12 +131,10 @@ class OAuthClient
      */
     public function refreshAccessToken()
     {
-        $meLiApp = $this->mel->meLiApp();
-
         $oAuthResponse = $this->requestToken([
             "grant_type"    => "refresh_token",
-            "client_id"     => $meLiApp->clientId(),
-            "client_secret" => $meLiApp->secretKey(),
+            "client_id"     => $this->meLiApp->clientId(),
+            "client_secret" => $this->meLiApp->secretKey(),
             "refresh_token" => $this->mel->accessToken()->getRefreshToken(),
         ]);
 
@@ -145,6 +154,7 @@ class OAuthClient
     protected function requestToken(array $params)
     {
         $httpClient = $this->mel->httpClient();
+
         $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, $params);
 
         $oAuthResponse = new OAuthResponse($rawResponse);
