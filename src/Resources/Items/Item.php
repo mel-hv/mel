@@ -21,6 +21,11 @@ class Item
     protected $categories;
 
     /**
+     * @var ItemsHelper
+     */
+    protected $itemsHelper;
+
+    /**
      * @var array Item details
      */
     protected $details;
@@ -35,9 +40,15 @@ class Item
     {
         $this->httpClient = $mel->httpClient();
         $this->categories = $mel->categories();
+        $this->itemsHelper = $mel->items();
         $this->details = $details;
     }
 
+    /**
+     * Get item data using id
+     *
+     * @return \Mel\Http\Responses\Response
+     */
     public function get()
     {
         $response = $this->httpClient->sendRequest('GET', self::ENDPOINT . $this->details['id']);
@@ -47,6 +58,11 @@ class Item
         return $response;
     }
 
+    /**
+     * Publish Item
+     *
+     * @return \Mel\Http\Responses\Response
+     */
     public function publish()
     {
         $response = $this->httpClient->sendRequest('POST', self::ENDPOINT, $this->details);
@@ -56,6 +72,27 @@ class Item
         return $response;
     }
 
+    /**
+     * Update item details
+     *
+     * @param array $details
+     *
+     * @return \Mel\Http\Responses\Response
+     */
+    public function update(array $details)
+    {
+        $response = $this->httpClient->sendRequest('PUT', self::ENDPOINT . $this->id, $details);
+
+        $this->details = $response->getDecodedBody();
+
+        return $response;
+    }
+
+    /**
+     * Get category using title and add to details
+     *
+     * @param string|null $title
+     */
     public function categorize($title = null)
     {
         if (!$title) {
@@ -65,6 +102,16 @@ class Item
         $response = $this->categories->predict($title);
 
         $this->details['category_id'] = $response->getBodyItem('id');
+    }
+
+    /**
+     * Return if item has valid details
+     *
+     * @return bool
+     */
+    public function isValid()
+    {
+        return $this->itemsHelper->validate($this);
     }
 
     /**

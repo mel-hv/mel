@@ -6,9 +6,11 @@ use Mel\Http\HttpClient;
 use Mel\Http\Responses\Response;
 use Mel\Resources\Categories;
 use Mel\Resources\Items\Item;
+use Mel\Resources\Items\ItemsHelper;
 use MelTests\Unit\Fixtures\Responses\ItemHttpResponse as RawItemResponse;
-use MelTests\TestCase;
+use MelTests\Unit\Fixtures\Responses\ItemHttpResponse;
 use MelTests\Unit\Fixtures\Responses\PredictCategoryResponse;
+use MelTests\TestCase;
 use Mockery;
 
 class ItemTest extends TestCase
@@ -27,6 +29,12 @@ class ItemTest extends TestCase
      * @var Mockery\MockInterface|\Mel\Resources\Categories
      */
     protected $categoriesHelper;
+
+    /**
+     * @var Mockery\MockInterface|\Mel\Resources\Items\Item
+     */
+    protected $itemsHelper;
+
     /**
      * @inheritdoc \Mockery\MockInterface|\Mel\Mel
      */
@@ -40,6 +48,8 @@ class ItemTest extends TestCase
 
         $this->categoriesHelper = Mockery::mock(Categories::class);
 
+        $this->itemsHelper = Mockery::mock(ItemsHelper::class);
+
         $this->melMock->shouldReceive('httpClient')
             ->once()
             ->withNoArgs()
@@ -49,6 +59,11 @@ class ItemTest extends TestCase
             ->once()
             ->withNoArgs()
             ->andReturn($this->categoriesHelper);
+
+        $this->melMock->shouldReceive('items')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($this->itemsHelper);
     }
 
     public function testGetItemData()
@@ -96,18 +111,43 @@ class ItemTest extends TestCase
 
     public function testCategorizeItemAutomatically()
     {
-        $itemDetails = ['title' => 'Product Name', 'description' => 'Product Description'];
-
-
         $this->categoriesHelper->shouldReceive('predict')
             ->once()
-            ->with('Product Name')
+            ->with($this->itemDetails['title'])
             ->andReturn(new Response(new PredictCategoryResponse()));
 
-        $item = new Item($this->melMock, $itemDetails);
+        $item = new Item($this->melMock, $this->itemDetails);
 
         $item->categorize();
 
         $this->assertEquals(PredictCategoryResponse::BODY_ARRAY_FORMAT['id'], $item->categoryId);
+    }
+
+    public function testValidateItemDataUsingClassValidator()
+    {
+        $item = new Item($this->melMock, $this->itemDetails);
+
+        $this->itemsHelper->shouldReceive('validate')
+            ->once()
+            ->with($item)
+            ->andReturn(true);
+
+        $this->assertTrue($item->isValid());
+    }
+
+    public function testShouldUpdateExistentItem()
+    {
+
+        $this->httpClient->shouldReceive('sendRequest')
+            ->once()
+            ->with('PUT', '/items/MLA600190449', ['title' => 'Iphone 6 64gb Space Gray Liberado'])
+            ->andReturn(new Response(new ItemHttpResponse()));
+
+        $item = new Item($this->melMock, ['id' => 'MLA600190449']);
+
+        $response = $item->update(['title' => 'Iphone 6 64gb Space Gray Liberado']);
+
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertEquals($this->itemDetails['title'], $item->title);
     }
 }
