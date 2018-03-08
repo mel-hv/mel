@@ -9,14 +9,14 @@ use Mockery;
 class TestCase extends BaseTestCase
 {
     /**
-     * @var string Mercado Libre uri of the api
-     */
-    protected $apiUri = 'https://api.mercadolibre.com/';
-
-    /**
      * @var \Mockery\MockInterface|\Mel\Mel
      */
     protected $melMock;
+
+    /**
+     * @var string Mercado Libre uri of the api
+     */
+    protected $apiUri = 'https://api.mercadolibre.com/';
 
     /**
      * @var string It is the APP ID of the application you created
@@ -28,7 +28,7 @@ class TestCase extends BaseTestCase
      * @var string The Secret Key generated for your application when created
      * @see http://developers.mercadolibre.com/server-side/
      */
-    protected $secretKey  = 'ThisIsASimpleStringCreatedToTests';
+    protected $secretKey = 'ThisIsASimpleStringCreatedToTests';
 
     /**
      * @var string The redirect URI configured for your application or one of the allowed domains
