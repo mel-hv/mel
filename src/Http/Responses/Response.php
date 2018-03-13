@@ -2,66 +2,71 @@
 
 namespace Mel\Http\Responses;
 
-use GuzzleHttp\Psr7\Response as GuzzlerResponse;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
-class Response extends GuzzlerResponse implements ResponseInterface
+class Response implements ResponseInterface
 {
     /**
-     * @var array The decoded body of the response
+     * @var PsrResponseInterface
+     */
+    protected $httpData;
+
+    /**
+     * @var array The decoded body of the http response
      */
     protected $decodedBody;
 
     /**
      * Response constructor.
-     * @param ResponseInterface $rawResponse Raw response used to build final response object
-     * @param mixed             $reason      Reason phrase
-     */
-    public function __construct(ResponseInterface $rawResponse, $reason = null)
-    {
-        parent::__construct(
-            $rawResponse->getStatusCode(),
-            $rawResponse->getHeaders(),
-            $rawResponse->getBody(),
-            $rawResponse->getProtocolVersion(),
-            $reason
-        );
-
-        $this->decodeBody();
-    }
-
-    /**
-     * Convert the raw response into an array if possible
-     */
-    protected function decodeBody()
-    {
-        $this->decodedBody = json_decode($this->getBodyJson(), true);
-    }
-
-    public function getDecodedBody()
-    {
-        return $this->decodedBody;
-    }
-
-    /**
-     *  Returns the remaining contents in a string
      *
-     * @return bool|string
+     * @param PsrResponseInterface $rawResponse Raw response used to build final response object
      */
-    public function getBodyJson()
+    public function __construct(PsrResponseInterface $rawResponse)
     {
-        return $this->getBody()->__toString();
+        $this->httpData = $rawResponse;
+
+        $this->decodedBody = json_decode($this, true);
     }
 
     /**
-     * Get json item value
+     * @inheritdoc
+     */
+    public function http()
+    {
+        return $this->httpData;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function get($key = null, $default = null)
+    {
+        if (!$key) {
+            return (object)$this->decodedBody;
+        }
+
+        return (array_key_exists($key, $this->decodedBody)) ? $this->decodedBody[$key] : $default;
+    }
+
+    /**
+     * Return string of the body
      *
-     * @param string $key
-     * @param mixed  $default
+     * @return string
+     */
+    public function __toString()
+    {
+        return $this->http()->getBody()->__toString();
+    }
+
+    /**
+     * Return data from response json
+     *
+     * @param $name string
+     *
      * @return mixed
      */
-    public function getBodyItem($key, $default = null)
+    public function __get($name)
     {
-        return (array_key_exists($key, $this->decodedBody)) ? $this->decodedBody[$key] : $default;
+        return $this->get($name);
     }
 }

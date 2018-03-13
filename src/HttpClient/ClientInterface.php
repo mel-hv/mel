@@ -1,6 +1,6 @@
 <?php
 
-namespace Mel\Http;
+namespace Mel\HttpClient;
 
 use Psr\Http\Message\RequestInterface;
 use Mel\Http\Responses\Response;
@@ -12,10 +12,9 @@ interface ClientInterface
      *
      * @param RequestInterface $request Request to send
      *
-     * @param array            $options Options to configure request
      * @return \Mel\Http\Responses\Response
      */
-    public function send(RequestInterface $request, $options = []);
+    public function sendRequest(RequestInterface $request);
 
     /**
      * Build request and send
@@ -23,8 +22,7 @@ interface ClientInterface
      * @param string     $method
      * @param string     $endpoint
      * @param array|null $params
-     * @param array      $options
      * @return Response
      */
-    public function sendRequest($method, $endpoint, array $params = null, $options = []);
+    public function send($method, $endpoint, array $params = null);
 }

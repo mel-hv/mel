@@ -4,18 +4,30 @@ namespace MelTests\Unit\Http\Responses;
 
 use Mel\Http\Responses\Response;
 use MelTests\TestCase;
-use MelTests\Unit\Fixtures\Responses\FooBarResponse;
+use Psr\Http\Message\ResponseInterface;
 
 class ResponseTest extends TestCase
 {
-    public function testShouldBuildFinalResponseUsingRawResponse()
+    public function testShouldBuildMelResponseUsingRawResponse()
     {
-        $responseBody = (object)FooBarResponse::BODY_ARRAY_FORMAT;
+        $json = '{"status":202,"message":"Simple Message"}';
 
-        $response = new Response(new FooBarResponse());
+        $rawResponse = $this->createResponse($json);
 
-        $this->assertEquals(FooBarResponse::BODY_ARRAY_FORMAT, $response->getDecodedBody());
-        $this->assertEquals($responseBody->message, $response->getBodyItem('message'));
-        $this->assertEquals($responseBody->status, $response->getBodyItem('status'));
+        $melResponse = new Response($rawResponse);
+
+        $this->assertInstanceOf(ResponseInterface::class, $melResponse->http());
+        $this->assertEquals(202, $melResponse->http()->getStatusCode());
+
+        $this->assertEquals(202, $melResponse->get()->status);
+        $this->assertEquals('Simple Message', $melResponse->get()->message);
+
+
+        $this->assertEquals("Simple Message", $melResponse->get('message'));
+        $this->assertEquals("Empty", $melResponse->get('messages', "Empty"));
+
+        $this->assertEquals(202, $melResponse->status);
+        $this->assertEquals('Simple Message', $melResponse->message);
+        $this->assertNull($melResponse->failField);
     }
 }
