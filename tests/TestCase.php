@@ -3,8 +3,13 @@
 namespace MelTests;
 
 use Mel\Mel;
-use PHPUnit\Framework\TestCase as BaseTestCase;
+use Mel\MeLiApp;
+use Mel\Country;
 use Mockery;
+use PHPUnit\Framework\TestCase as BaseTestCase;
+use Http\Discovery\Strategy\MockClientStrategy;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\HttpClientDiscovery;
 
 class TestCase extends BaseTestCase
 {
@@ -53,7 +58,10 @@ class TestCase extends BaseTestCase
     protected function setUp()
     {
         parent::setUp();
+
         $this->melMock = Mockery::mock(Mel::class);
+
+        HttpClientDiscovery::prependStrategy(MockClientStrategy::class);
     }
 
     /**
@@ -63,5 +71,63 @@ class TestCase extends BaseTestCase
     {
         Mockery::close();
         parent::tearDown();
+    }
+
+    /**
+     * Return Mel instance
+     *
+     * @return Mel
+     * @throws \Exception
+     * @throws \Mel\Exceptions\MelException
+     */
+    protected function getMel()
+    {
+        $meLiApp = new MeLiApp($this->appId, $this->secretKey, $this->redirectUri);
+
+        $mel = new Mel($meLiApp, new Country(Country::BRASIL));
+
+        return $mel;
+    }
+
+    /**
+     * Create PsrResponse instance
+     *
+     * @param string|array $content
+     * @param int          $status
+     * @param null         $reasonPhrase
+     * @param array        $headers
+     *
+     * @return \Psr\Http\Message\ResponseInterface
+     */
+    protected function createResponse($content, $status = 202, $reasonPhrase = null, $headers = [])
+    {
+        $body = '';
+
+        if (is_string($content)) {
+            $body = $content;
+        }
+
+        if (is_array($content)) {
+            $body = json_encode($content);
+        }
+
+        $response = MessageFactoryDiscovery::find()->createResponse($status, $reasonPhrase, $headers, $body);
+
+        return $response;
+    }
+
+    /**
+     * Create PsrRequest instance
+     *
+     * @param string $method
+     * @param        $uri
+     * @param array  $headers
+     * @param null   $body
+     *
+     * @return \Psr\Http\Message\RequestInterface
+     */
+    protected function createRequest($method, $uri, $headers = [], $body = null)
+    {
+        return MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body);
     }
 }
