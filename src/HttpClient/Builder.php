@@ -2,10 +2,12 @@
 
 namespace Mel\HttpClient;
 
+use Mel\Mel;
 use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
 use Http\Client\Common\Plugin;
 use Http\Client\Common\PluginClient;
-use Http\Discovery\HttpClientDiscovery;
+use Http\Client\Common\Plugin\HeaderDefaultsPlugin;
 
 class Builder
 {
@@ -34,6 +36,26 @@ class Builder
     public function __construct(HttpClient $httpClient = null)
     {
         $this->httpClient = $httpClient ?: HttpClientDiscovery::find();
+    }
+
+    /**
+     * Create default Builder instance used in Mel
+     * This Builder contains default plugins list
+     *
+     * @param HttpClient|null $httpClient
+     *
+     * @return Builder
+     */
+    public static function create(HttpClient $httpClient = null)
+    {
+        $builder = new self($httpClient);
+
+        $builder->addPlugin(new HeaderDefaultsPlugin([
+            'User-Agent'   => sprintf('%1$s - %2$s', 'MEL', Mel::VERSION),
+            'Content-Type' => 'application/json',
+        ]));
+
+        return $builder;
     }
 
     /**

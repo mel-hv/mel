@@ -7,8 +7,9 @@ use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Auth\Storage\SessionStorage;
 use Mel\Exceptions\MelException;
-use Mel\Http\ClientInterface;
-use Mel\Http\HttpClient;
+use Mel\HttpClient\Builder as BuilderClient;
+use Mel\HttpClient\Client;
+use Mel\HttpClient\ClientInterface;
 
 class Mel
 {
@@ -61,23 +62,13 @@ class Mel
             throw new MelException('Authenticated mode require a country');
         }
 
-        $this->httpClient = $this->resolveHttpClient();
+        $this->httpClient = $this->httpClient();
 
         if (!$this->meLiApp()->isAnonymousClient()) {
             $this->oAuthClient = new OAuthClient($this);
         }
 
         $this->accessToken = $accessToken ?: new AccessToken(new SessionStorage());
-    }
-
-    /**
-     * Resolve HttpClient instance used for the Mel
-     *
-     * @return ClientInterface
-     */
-    protected function resolveHttpClient()
-    {
-        return new HttpClient($this);
     }
 
     /**
@@ -93,10 +84,18 @@ class Mel
     /**
      * Return http client
      *
+     * @param BuilderClient|null $builder
+     *
      * @return ClientInterface
      */
-    public function httpClient()
+    public function httpClient(BuilderClient $builder = null)
     {
+        if (!$this->httpClient || $builder) {
+            $builder = $builder ?: BuilderClient::create();
+
+            $this->httpClient = new Client($builder);
+        }
+
         return $this->httpClient;
     }
 
