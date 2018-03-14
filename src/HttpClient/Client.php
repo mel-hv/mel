@@ -2,6 +2,7 @@
 
 namespace Mel\HttpClient;
 
+use Http\Client\HttpClient;
 use Mel\Http\Responses\Response;
 use Http\Discovery\MessageFactoryDiscovery;
 use Psr\Http\Message\RequestInterface;
@@ -9,9 +10,9 @@ use Psr\Http\Message\RequestInterface;
 class Client implements ClientInterface
 {
     /**
-     * @var Builder A http client builder
+     * @var HttpClient
      */
-    protected $builderClient;
+    private $httpClient;
 
     /**
      * @var \Http\Message\MessageFactory
@@ -25,7 +26,7 @@ class Client implements ClientInterface
      */
     public function __construct(Builder $builder)
     {
-        $this->builderClient = $builder;
+        $this->httpClient = $builder->getHttpClient();
 
         $this->requestFactory = MessageFactoryDiscovery::find();
     }
@@ -35,7 +36,7 @@ class Client implements ClientInterface
      */
     public function sendRequest(RequestInterface $request)
     {
-        $rawResponse = $this->builderClient->getHttpClient()->sendRequest($request);
+        $rawResponse = $this->httpClient->sendRequest($request);
 
         return new Response($rawResponse);
     }
@@ -43,11 +44,18 @@ class Client implements ClientInterface
     /**
      * @inheritdoc
      */
-    public function send($method, $endpoint, array $params = null)
+    public function send($method, $uri, array $headers = [], $body = null)
     {
         $method = mb_strtoupper($method);
-        $body = is_array($params) ? json_encode($params) : null;
-        $request = $this->requestFactory->createRequest($method, $endpoint, [], $body);
+        $body = is_array($body) ? json_encode($body) : $body;
 
-        return $this->sendRequest($request);
-}}
+        return $this->sendRequest($this->requestFactory->createRequest(
+            $method,
+            $uri,
+            [],
+            $body
+        ));
+    }
+
+
+}

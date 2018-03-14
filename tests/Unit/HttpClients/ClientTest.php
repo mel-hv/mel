@@ -5,8 +5,6 @@ namespace MelTests\Unit\HttpClients;
 use Mel\HttpClient\Builder;
 use Mel\HttpClient\Client;
 use Mel\Http\Responses\ResponseInterface;
-use Http\Mock\Client as MockClient;
-use Mockery;
 use MelTests\TestCase;
 
 class ClientTest extends TestCase
@@ -14,16 +12,10 @@ class ClientTest extends TestCase
 
     public function testSendValidRequest()
     {
-        $builderClient = Mockery::mock(Builder::class);
-        $mockClient = new MockClient();
-
-        $builderClient->shouldReceive('getHttpClient')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($mockClient);
-
         $rawResponse = $this->createResponse(['message' => 'This is a simple http response']);
-        $mockClient->setDefaultResponse($rawResponse);
+        $this->mockClient->setDefaultResponse($rawResponse);
+
+        $builderClient = new Builder($this->mockClient);
 
         $httpClient = new Client($builderClient);
 
@@ -36,22 +28,14 @@ class ClientTest extends TestCase
 
     public function testCreateAndSendValidRequest()
     {
-        $builderClient = Mockery::mock(Builder::class);
-        $mockClient = new MockClient();
-
-        $builderClient->shouldReceive('getHttpClient')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($mockClient);
-
         $rawResponse = $this->createResponse(['message' => 'This is a simple http response']);
-        $mockClient->setDefaultResponse($rawResponse);
+        $this->mockClient->setDefaultResponse($rawResponse);
 
-        $httpClient = new Client($builderClient);
+        $httpClient = new Client(new Builder($this->mockClient));
 
 
-        $response = $httpClient->send('post', '/', ['name' => 'message']);
-        $requests = $mockClient->getRequests();
+        $response = $httpClient->send('post', '/', [], ['name' => 'message']);
+        $requests = $this->mockClient->getRequests();
 
 
         $this->assertInstanceOf(ResponseInterface::class, $response);

@@ -2,6 +2,7 @@
 
 namespace MelTests;
 
+use Http\Mock\Client;
 use Mel\Mel;
 use Mel\MeLiApp;
 use Mel\Country;
@@ -17,6 +18,11 @@ class TestCase extends BaseTestCase
      * @var \Mockery\MockInterface|\Mel\Mel
      */
     protected $melMock;
+
+    /**
+     * @var \Http\Mock\Client
+     */
+    protected $mockClient;
 
     /**
      * @var string Mercado Libre uri of the api
@@ -60,6 +66,8 @@ class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->melMock = Mockery::mock(Mel::class);
+
+        $this->mockClient = new Client();
 
         HttpClientDiscovery::prependStrategy(MockClientStrategy::class);
     }

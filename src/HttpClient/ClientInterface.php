@@ -2,27 +2,22 @@
 
 namespace Mel\HttpClient;
 
-use Psr\Http\Message\RequestInterface;
 use Mel\Http\Responses\Response;
+use Http\Client\HttpClient;
+use Psr\Http\Message\StreamInterface;
+use Psr\Http\Message\UriInterface;
 
-interface ClientInterface
+interface ClientInterface extends HttpClient
 {
     /**
-     * Send an HTTP request.
+     * Create and send http requests
      *
-     * @param RequestInterface $request Request to send
+     * @param string                            $method HTTP method to use
+     * @param string|UriInterface               $uri
+     * @param array                             $headers
+     * @param string|array|StreamInterface|null $body
      *
-     * @return \Mel\Http\Responses\Response
-     */
-    public function sendRequest(RequestInterface $request);
-
-    /**
-     * Build request and send
-     *
-     * @param string     $method
-     * @param string     $endpoint
-     * @param array|null $params
      * @return Response
      */
-    public function send($method, $endpoint, array $params = null);
+    public function send($method, $uri, array $headers = [], $body = null);
 }
