@@ -4,7 +4,6 @@ namespace MelTests\Unit\HttpClients;
 
 use Mel\HttpClient\Builder;
 use Http\Client\Common\Plugin;
-use Http\Message\RequestFactory;
 use Http\Client\HttpClient;
 use Mel\Mel;
 use Mockery;
@@ -23,10 +22,7 @@ class BuilderTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->builderClient = new Builder(
-            $this->mockClient,
-            Mockery::mock((RequestFactory::class))
-        );
+        $this->builderClient = new Builder($this->mockClient);
     }
 
     public function testHttpClientShouldBeAnHttpMethodsClient()
@@ -58,23 +54,22 @@ class BuilderTest extends TestCase
 
     public function testCreateBuilderInstanceUsingBasicPluginsToUse()
     {
-        $builder = Builder::create($this->mockClient);
+        $builder = Builder::create($this->getMel(), $this->mockClient);
 
         // Test send request
         $builder->getHttpClient()
             ->sendRequest(
-              $this->createRequest('POST', '/')
+                $this->createRequest('POST', '/')
             );
 
         $requests = $this->mockClient->getRequests();
 
 
-
         $this->assertInstanceOf(Builder::class, $builder);
-        $this->assertAttributeCount(1, 'plugins', $builder);
+        $this->assertAttributeCount(2, 'plugins', $builder);
 
         // Assert Default Headers
-        $this->assertEquals('MEL - '. Mel::VERSION, $requests[0]->getHeaderLine('User-Agent'));
+        $this->assertEquals('MEL - ' . Mel::VERSION, $requests[0]->getHeaderLine('User-Agent'));
         $this->assertEquals('application/json', $requests[0]->getHeaderLine('Content-Type'));
     }
 }

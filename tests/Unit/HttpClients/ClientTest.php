@@ -3,7 +3,7 @@
 namespace MelTests\Unit\HttpClients;
 
 use Mel\HttpClient\Builder;
-use Mel\HttpClient\Client;
+use Mel\HttpClient\ApiClient;
 use Mel\Http\Responses\ResponseInterface;
 use MelTests\TestCase;
 
@@ -17,7 +17,7 @@ class ClientTest extends TestCase
 
         $builderClient = new Builder($this->mockClient);
 
-        $httpClient = new Client($builderClient);
+        $httpClient = new ApiClient($builderClient);
 
         $request = $this->createRequest('POST', '/');
         $response = $httpClient->sendRequest($request);
@@ -31,7 +31,7 @@ class ClientTest extends TestCase
         $rawResponse = $this->createResponse(['message' => 'This is a simple http response']);
         $this->mockClient->setDefaultResponse($rawResponse);
 
-        $httpClient = new Client(new Builder($this->mockClient));
+        $httpClient = new ApiClient(new Builder($this->mockClient));
 
 
         $response = $httpClient->send('post', '/', [], ['name' => 'message']);

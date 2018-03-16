@@ -2,6 +2,7 @@
 
 namespace Mel\HttpClient;
 
+use Mel\HttpClient\Plugins\Authentication;
 use Mel\Mel;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
@@ -42,13 +43,18 @@ class Builder
      * Create default Builder instance used in Mel
      * This Builder contains default plugins list
      *
+     * @param Mel             $mel
      * @param HttpClient|null $httpClient
      *
      * @return Builder
      */
-    public static function create(HttpClient $httpClient = null)
+    public static function create(Mel $mel, HttpClient $httpClient = null)
     {
         $builder = new self($httpClient);
+
+        $authentication = new Authentication($mel);
+
+        $builder->addPlugin(new Plugin\AuthenticationPlugin($authentication));
 
         $builder->addPlugin(new HeaderDefaultsPlugin([
             'User-Agent'   => sprintf('%1$s - %2$s', 'MEL', Mel::VERSION),

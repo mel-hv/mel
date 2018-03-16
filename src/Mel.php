@@ -8,7 +8,7 @@ use Mel\Auth\OAuthClient;
 use Mel\Auth\Storage\SessionStorage;
 use Mel\Exceptions\MelException;
 use Mel\HttpClient\Builder as BuilderClient;
-use Mel\HttpClient\Client;
+use Mel\HttpClient\ApiClient;
 use Mel\HttpClient\ClientInterface;
 
 class Mel
@@ -91,9 +91,9 @@ class Mel
     public function httpClient(BuilderClient $builder = null)
     {
         if (!$this->httpClient || $builder) {
-            $builder = $builder ?: BuilderClient::create();
+            $builder = $builder ?: BuilderClient::create($this);
 
-            $this->httpClient = new Client($builder);
+            $this->httpClient = new ApiClient($builder);
         }
 
         return $this->httpClient;

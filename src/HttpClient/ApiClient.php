@@ -7,7 +7,7 @@ use Mel\Http\Responses\Response;
 use Http\Discovery\MessageFactoryDiscovery;
 use Psr\Http\Message\RequestInterface;
 
-class Client implements ClientInterface
+class ApiClient implements ClientInterface
 {
     /**
      * @var HttpClient
