@@ -13,11 +13,30 @@ use MelTests\TestCase;
 
 class MelTest extends TestCase
 {
+    /**
+     * @dataProvider classAndMethodsList
+     */
+    public function testShouldReturnCorrectlyInstance($className, $methodToCall)
+    {
+        $mel = $this->getMel();
+
+        $this->assertInstanceOf($className, $mel->{$methodToCall}());
+    }
+
+    public function classAndMethodsList()
+    {
+        return [
+            [MeLiApp::class, 'meLiApp'],
+            [Country::class, 'country'],
+            [OAuthClient::class, 'oAuthClient'],
+            [AccessTokenInterface::class, 'accessToken'],
+            [\Mel\Http\UriGenerator::class, 'uriGenerator'],
+        ];
+    }
+
     public function testConfigureAuthenticatedMode()
     {
-        $meLiApp = new MeLiApp($this->appId, $this->secretKey, $this->redirectUri);
-
-        $mel = new Mel($meLiApp, new Country(Country::BRASIL));
+        $mel = $this->getMel();
 
         $this->assertInstanceOf(MeLiApp::class, $mel->meLiApp());
         $this->assertInstanceOf(Country::class, $mel->country());
@@ -65,4 +84,5 @@ class MelTest extends TestCase
 
         $this->assertNotSame($client1, $client2);
     }
+
 }

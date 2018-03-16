@@ -7,6 +7,7 @@ use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Auth\Storage\SessionStorage;
 use Mel\Exceptions\MelException;
+use Mel\Http\UriGenerator;
 use Mel\HttpClient\Builder as BuilderClient;
 use Mel\HttpClient\ApiClient;
 use Mel\HttpClient\ClientInterface;
@@ -41,6 +42,11 @@ class Mel
     protected $accessToken;
 
     /**
+     * @var UriGenerator
+     */
+    protected $uriGenerator;
+
+    /**
      * Mel constructor.
      *
      * @param MeLiApp              $meLiApp
@@ -69,6 +75,8 @@ class Mel
         }
 
         $this->accessToken = $accessToken ?: new AccessToken(new SessionStorage());
+
+        $this->uriGenerator = new UriGenerator($this);
     }
 
     /**
@@ -99,7 +107,6 @@ class Mel
         return $this->httpClient;
     }
 
-
     /**
      * Return OAuth client instance
      *
@@ -128,5 +135,15 @@ class Mel
     public function accessToken()
     {
         return $this->accessToken;
+    }
+
+    /**
+     * Return UriGenerator
+     *
+     * @return UriGenerator
+     */
+    public function uriGenerator()
+    {
+        return $this->uriGenerator;
     }
 }

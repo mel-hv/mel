@@ -2,12 +2,13 @@
 
 namespace Mel\HttpClient;
 
-use Mel\HttpClient\Plugins\Authentication;
 use Mel\Mel;
+use Mel\Http\UriGenerator;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Client\Common\Plugin;
 use Http\Client\Common\PluginClient;
+use Mel\HttpClient\Plugins\Authentication;
 use Http\Client\Common\Plugin\HeaderDefaultsPlugin;
 
 class Builder
@@ -52,10 +53,20 @@ class Builder
     {
         $builder = new self($httpClient);
 
-        $authentication = new Authentication($mel);
+        // Base uri Plugin
+        $uriGenerator = new UriGenerator($mel);
+        $baseUri = new Plugin\BaseUriPlugin($uriGenerator->createUri(UriGenerator::API_URI), [
+            'replace' => true,
+        ]);
+        $builder->addPlugin($baseUri);
 
+
+        // Authentication Plugin
+        $authentication = new Authentication($mel);
         $builder->addPlugin(new Plugin\AuthenticationPlugin($authentication));
 
+
+        // Headers plugin
         $builder->addPlugin(new HeaderDefaultsPlugin([
             'User-Agent'   => sprintf('%1$s - %2$s', 'MEL', Mel::VERSION),
             'Content-Type' => 'application/json',

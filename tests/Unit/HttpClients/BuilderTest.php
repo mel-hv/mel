@@ -2,6 +2,7 @@
 
 namespace MelTests\Unit\HttpClients;
 
+use Http\Discovery\UriFactoryDiscovery;
 use Mel\HttpClient\Builder;
 use Http\Client\Common\Plugin;
 use Http\Client\HttpClient;
@@ -56,20 +57,25 @@ class BuilderTest extends TestCase
     {
         $builder = Builder::create($this->getMel(), $this->mockClient);
 
+        $uri = UriFactoryDiscovery::find()->createUri('/users');
+
         // Test send request
         $builder->getHttpClient()
             ->sendRequest(
-                $this->createRequest('POST', '/')
+                $this->createRequest('POST', $uri)
             );
 
         $requests = $this->mockClient->getRequests();
 
 
         $this->assertInstanceOf(Builder::class, $builder);
-        $this->assertAttributeCount(2, 'plugins', $builder);
+        $this->assertAttributeCount(3, 'plugins', $builder); // Register 3 plugins by default
 
         // Assert Default Headers
         $this->assertEquals('MEL - ' . Mel::VERSION, $requests[0]->getHeaderLine('User-Agent'));
         $this->assertEquals('application/json', $requests[0]->getHeaderLine('Content-Type'));
+
+        // Assert Uri
+        $this->assertEquals('https://api.mercadolibre.com/users', $requests[0]->getUri()->__toString());
     }
 }
