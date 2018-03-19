@@ -3,136 +3,64 @@
 namespace MelTests\Unit\Auth;
 
 use Mel\Auth\OAuthClient;
-use Mel\Auth\AccessTokenInterface;
-use Mel\Country;
-use Mel\Http\Responses\OAuthResponse;
-use Mel\Http\ClientInterface;
+use Mel\Http\Responses\Response;
+use Mel\HttpClient\Builder;
 use Mel\MeLiApp;
-use MelTests\Unit\Fixtures\Responses\FooErrorResponse;
-use MelTests\Unit\Fixtures\Responses\BarOAuthResponse;
 use MelTests\TestCase;
 use Mockery;
+use Psr\Http\Message\UriInterface;
 
 class OAuthClientTest extends TestCase
 {
-     /**
-     * @var \Mockery\MockInterface|\Mel\MeLiApp
-     */
-    protected $meLiApp;
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        $this->meLiApp = Mockery::mock(MeLiApp::class);
-
-        $this->melMock->shouldReceive('meLiApp')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->meLiApp);
-    }
-
     public function testReturnLinkUsedToAuthorizeUser()
     {
-        $country = Mockery::mock(Country::class);
-
-        $this->melMock->shouldReceive('country')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($country);
-
-        $this->meLiApp->shouldReceive('clientId')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->appId);
-
-        $this->meLiApp->shouldReceive('redirectUri')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->redirectUri);
-
-        $country->shouldReceive('id')
-            ->once()
-            ->withNoArgs()
-            ->andReturn('MLB');
-
-        $oAuthClient = new OAuthClient($this->melMock);
+        $oAuthClient = new OAuthClient($this->getMel());
 
         $expected = sprintf(
-            'https://auth.mercadolivre.com.br/authorization?response_type=code&client_id=%1$s&redirect_uri=%2$s',
-            $this->appId,
-            $this->redirectUri
+            'https://auth.mercadolivre.com.br/authorization?%1$s',
+            http_build_query([
+                'response_type' => 'code',
+                'client_id'     => $this->appId,
+                'redirect_uri'  => $this->redirectUri,
+            ])
         );
 
-        $this->assertEquals($expected, $oAuthClient->getOAuthUri()->__toString());
+        $this->assertInstanceOf(UriInterface::class, $oAuthClient->getOAuthUri());
+        $this->assertEquals($expected, $oAuthClient->getOAuthUri());
     }
 
     public function testGetAccessTokenUsingReceivedCodeAndSaveAccessTokenData()
     {
+        // Arrange
         $code = 'this-is-a-code';
 
-        $httpClient = Mockery::mock(ClientInterface::class);
-        $accessToken = Mockery::mock(AccessTokenInterface::class);
+        $this->mockClient->addResponse(
+            $this->createResponse([
+                "access_token"  => "APP_USR-398483221908",
+                "token_type"    => "bearer",
+                "expires_in"    => 21600,
+                "scope"         => "offline_access read write",
+                "user_id"       => 268024640,
+                "refresh_token" => "TG-5a1277bfe4b1-2640",
+            ], 200)
+        );
 
-        $this->melMock->shouldReceive('httpClient')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($httpClient);
-
-        $this->melMock->shouldReceive('accessToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($accessToken);
-
-        // MeLiApp
-        $this->meLiApp->shouldReceive('clientId')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->appId);
-
-        $this->meLiApp->shouldReceive('secretKey')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->secretKey);
-
-        $this->meLiApp->shouldReceive('redirectUri')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->redirectUri);
-
-        // HttpClient
-        $httpClient->shouldReceive('sendRequest')
-            ->once()
-            ->with('POST', '/oauth/token', [
-                "grant_type"    => "authorization_code",
-                "client_id"     => $this->appId,
-                "client_secret" => $this->secretKey,
-                "redirect_uri"  => $this->redirectUri,
-                "code"          => $code,
-            ])
-            ->andReturn(new BarOAuthResponse());
-
-        // Access Token
-        $accessToken->shouldReceive('setToken')
-            ->once()
-            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
-
-        $accessToken->shouldReceive('setRefreshToken')
-            ->once()
-            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
-
-        $accessToken->shouldReceive('setExpiresIn')
-            ->once()
-            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
+        $mel = $this->getMel();
+        $builderClientTest = Builder::create($mel, $this->mockClient);
+        $mel->httpClient($builderClientTest);
 
         // Act
-        $oAuthClient = new OAuthClient($this->melMock);
-
+        $oAuthClient = new OAuthClient($mel);
         $response = $oAuthClient->authorize($code);
 
-        // Assert
-        $this->assertInstanceOf(OAuthResponse::class, $response);
+        // Asserts
+        $this->assertInstanceOf(Response::class, $response);
+
+        $request = $this->mockClient->getLastRequest();
+        $this->assertEquals('POST', $request->getMethod());
+        $this->assertEquals('/oauth/token', $request->getUri()->getPath());
     }
+
 
     /**
      * @expectedException \Mel\Exceptions\HttpResponseException
@@ -141,43 +69,25 @@ class OAuthClientTest extends TestCase
     {
         $code = 'this-is-a-code';
 
-        $httpClient = Mockery::mock(ClientInterface::class);
+        $this->mockClient->addResponse(
+            $this->createResponse([
+                'message' => 'This is a message error',
+                'error'   => 'error_id',
+                'status'  => 502,
+                'cause'   => [
+                    'first cause',
+                    'second cause',
+                ],
+            ], 502)
+        );
 
-        $this->melMock->shouldReceive('httpClient')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($httpClient);
+        $mel = $this->getMel();
+        $builderClientTest = Builder::create($mel, $this->mockClient);
+        $mel->httpClient($builderClientTest);
 
-        // MeLiApp
-        $this->meLiApp->shouldReceive('clientId')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->appId);
-
-        $this->meLiApp->shouldReceive('secretKey')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->secretKey);
-
-        $this->meLiApp->shouldReceive('redirectUri')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->redirectUri);
-
-        // HttpClient
-        $httpClient->shouldReceive('sendRequest')
-            ->once()
-            ->with('POST', '/oauth/token', [
-                "grant_type"    => "authorization_code",
-                "client_id"     => $this->appId,
-                "client_secret" => $this->secretKey,
-                "redirect_uri"  => $this->redirectUri,
-                "code"          => $code,
-            ])
-            ->andReturn(new FooErrorResponse());
 
         // Act
-        $oAuthClient = new OAuthClient($this->melMock);
+        $oAuthClient = new OAuthClient($mel);
 
         $oAuthClient->authorize($code);
     }
@@ -187,6 +97,13 @@ class OAuthClientTest extends TestCase
      */
     public function testThrowExceptionsIfCodeUsedToAuthIsInvalid()
     {
+        $meLiApp = Mockery::mock(MeLiApp::class);
+
+        $this->melMock->shouldReceive('meLiApp')
+            ->once()
+            ->withNoArgs()
+            ->andReturn($meLiApp);
+
         $oAuthClient = new OAuthClient($this->melMock);
 
         $oAuthClient->authorize();
@@ -194,65 +111,32 @@ class OAuthClientTest extends TestCase
 
     public function testRefreshAccessToken()
     {
-        $httpClient = Mockery::mock(ClientInterface::class);
-        $accessToken = Mockery::mock(AccessTokenInterface::class);
+        // Arrange
+        $code = 'this-is-a-code';
 
-        $this->melMock->shouldReceive('httpClient')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($httpClient);
+        $this->mockClient->addResponse(
+            $this->createResponse([
+                "access_token"  => "APP_USR-6092-3246532-cb45c82853f6e620bb0deda096b128d3-8035443",
+                "token_type"    => "bearer",
+                "expires_in"    => 10800,
+                "refresh_token" => "TG-5005b6b3e4b07e60756a3353",
+                "scope"         => "write read offline_access",
+            ], 200)
+        );
 
-        $this->melMock->shouldReceive('accessToken')
-            ->twice()
-            ->withNoArgs()
-            ->andReturn($accessToken);
-
-        // MeLiApp
-        $this->meLiApp->shouldReceive('clientId')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->appId);
-
-        $this->meLiApp->shouldReceive('secretKey')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->secretKey);
-
-        // HttpClient
-        $httpClient->shouldReceive('sendRequest')
-            ->once()
-            ->with('POST', '/oauth/token', [
-                "grant_type"    => "refresh_token",
-                "client_id"     => $this->appId,
-                "client_secret" => $this->secretKey,
-                "refresh_token" => $this->refreshToken,
-            ])
-            ->andReturn(new BarOAuthResponse());
-
-        // Access Token
-        $accessToken->shouldReceive('getRefreshToken')
-            ->once()
-            ->withNoArgs()
-            ->andReturn($this->refreshToken);
-
-        $accessToken->shouldReceive('setToken')
-            ->once()
-            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['access_token']);
-
-        $accessToken->shouldReceive('setRefreshToken')
-            ->once()
-            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['refresh_token']);
-
-        $accessToken->shouldReceive('setExpiresIn')
-            ->once()
-            ->with(BarOAuthResponse::BODY_ARRAY_FORMAT['expires_in']);
+        $mel = $this->getMel();
+        $builderClientTest = Builder::create($mel, $this->mockClient);
+        $mel->httpClient($builderClientTest);
 
         // Act
-        $oAuthClient = new OAuthClient($this->melMock);
-
+        $oAuthClient = new OAuthClient($mel);
         $response = $oAuthClient->refreshAccessToken();
 
-        // Assert
-        $this->assertInstanceOf(OAuthResponse::class, $response);
+        // Asserts
+        $this->assertInstanceOf(Response::class, $response);
+
+        $request = $this->mockClient->getLastRequest();
+        $this->assertEquals('POST', $request->getMethod());
+        $this->assertEquals('/oauth/token', $request->getUri()->getPath());
     }
 }

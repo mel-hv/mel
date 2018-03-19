@@ -10,7 +10,7 @@ class ErrorResponse extends Response
      */
     public function hasErrors()
     {
-        return !is_null($this->getBodyItem('error'));
+        return !is_null($this->get('error'));
     }
 
     /**
@@ -19,7 +19,7 @@ class ErrorResponse extends Response
      */
     public function getMessageError()
     {
-        return $this->getBodyItem('message');
+        return $this->get('message');
     }
 
     /**
@@ -28,7 +28,7 @@ class ErrorResponse extends Response
      */
     public function getErrorId()
     {
-        return $this->getBodyItem('error');
+        return $this->get('error');
     }
 
     /**
@@ -37,7 +37,7 @@ class ErrorResponse extends Response
      */
     public function getErrorStatus()
     {
-        return $this->getBodyItem('status');
+        return $this->get('status');
     }
 
     /**
@@ -46,6 +46,6 @@ class ErrorResponse extends Response
      */
     public function getErrorCause()
     {
-        return $this->getBodyItem('cause');
+        return $this->get('cause');
     }
 }

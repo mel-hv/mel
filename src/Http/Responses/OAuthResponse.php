@@ -11,7 +11,7 @@ class OAuthResponse extends Response
      */
     public function accessToken()
     {
-        return $this->getBodyItem('access_token');
+        return $this->get('access_token');
     }
 
     /**
@@ -21,7 +21,7 @@ class OAuthResponse extends Response
      */
     public function tokenType()
     {
-        return $this->getBodyItem('token_type');
+        return $this->get('token_type');
     }
 
     /**
@@ -31,7 +31,7 @@ class OAuthResponse extends Response
      */
     public function expiresIn()
     {
-        return (int)$this->getBodyItem('expires_in', 0);
+        return (int)$this->get('expires_in', 0);
     }
 
     /**
@@ -41,7 +41,7 @@ class OAuthResponse extends Response
      */
     public function refreshToken()
     {
-        return $this->getBodyItem('refresh_token');
+        return $this->get('refresh_token');
     }
 
     /**
@@ -51,7 +51,7 @@ class OAuthResponse extends Response
      */
     public function scope()
     {
-        $scope = $this->getBodyItem('scope');
+        $scope = $this->get('scope');
 
         if (is_string($scope)) {
             return explode(' ', $scope);

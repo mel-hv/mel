@@ -2,44 +2,15 @@
 
 namespace Mel\Auth;
 
-use Mel\Exceptions\MelException;
 use Mel\Mel;
-use Mel\Country;
+use Mel\Exceptions\MelException;
 use Mel\Http\Responses\ErrorResponse;
 use Mel\Http\Responses\OAuthResponse;
 use Mel\Exceptions\HttpResponseException;
-use GuzzleHttp\Psr7\Uri;
 
 class OAuthClient
 {
     const OAUTH_ENDPOINT = "/oauth/token";
-
-    /**
-     * Auth url list by country
-     *
-     * @var array
-     */
-    protected static $authUri = [
-        Country::ARGENTINA   => "https://auth.mercadolibre.com.ar",
-        Country::BOLIVIA     => "https://auth.mercadolibre.com.bo",
-        Country::BRASIL      => "https://auth.mercadolivre.com.br",
-        Country::CHILE       => "https://auth.mercadolibre.cl",
-        Country::COLOMBIA    => "https://auth.mercadolibre.com.co",
-        Country::COSTA_RICA  => "https://auth.mercadolibre.com.cr",
-        Country::DOMINICANA  => "https://auth.mercadolibre.com.do",
-        Country::EL_SALVADOR => "https://auth.mercadolibre.com.sv",
-        Country::EQUADOR     => "https://auth.mercadolibre.com.ec",
-        Country::GUATEMALA   => "https://auth.mercadolibre.com.gt",
-        Country::HONDURAS    => "https://auth.mercadolibre.com.hn",
-        Country::MEXICO      => "https://auth.mercadolibre.com.mx",
-        Country::NICARAGUA   => "https://auth.mercadolibre.com.ni",
-        Country::PANAMA      => "https://auth.mercadolibre.com.pa",
-        Country::PARAGUAI    => "https://auth.mercadolibre.com.py",
-        Country::PERU        => "https://auth.mercadolibre.com.pe",
-        Country::PORTUGAL    => "https://auth.mercadolibre.com.pt",
-        Country::URUGUAI     => "https://auth.mercadolibre.com.uy",
-        Country::VENEZUELA   => "https://auth.mercadolibre.com.ve",
-    ];
 
     /**
      * @var Mel
@@ -66,17 +37,17 @@ class OAuthClient
     /**
      * Get uri used to Oauth authorization
      *
-     * @return Uri|\Psr\Http\Message\UriInterface
+     * @return \Psr\Http\Message\UriInterface
      */
     public function getOAuthUri()
     {
-        $country = $this->mel->country();
+        $uriGenerator = $this->mel->uriGenerator();
 
-        $uri = new Uri(self::$authUri[$country->id()] . '/authorization');
-
-        $uri = Uri::withQueryValue($uri, 'response_type', 'code');
-        $uri = Uri::withQueryValue($uri, 'client_id', $this->meLiApp->clientId());
-        $uri = Uri::withQueryValue($uri, 'redirect_uri', $this->meLiApp->redirectUri());
+        $uri = $uriGenerator->createOAuthUri('/authorization', [
+            'response_type' => 'code',
+            'client_id'     => $this->meLiApp->clientId(),
+            'redirect_uri'  => $this->meLiApp->redirectUri(),
+        ]);
 
         return $uri;
     }
@@ -90,7 +61,7 @@ class OAuthClient
      */
     public function responseHasErrors(OAuthResponse $oAuthResponse)
     {
-        return (is_null($oAuthResponse->accessToken()) || !is_null($oAuthResponse->getBodyItem('error')));
+        return (is_null($oAuthResponse->accessToken()) || !is_null($oAuthResponse->get('error')));
     }
 
     /**
@@ -155,12 +126,12 @@ class OAuthClient
     {
         $httpClient = $this->mel->httpClient();
 
-        $rawResponse = $httpClient->sendRequest('POST', self::OAUTH_ENDPOINT, $params);
+        $response = $httpClient->send('POST', self::OAUTH_ENDPOINT, $params);
 
-        $oAuthResponse = new OAuthResponse($rawResponse);
+        $oAuthResponse = new OAuthResponse($response->http());
 
         if ($this->responseHasErrors($oAuthResponse)) {
-            throw new HttpResponseException(new ErrorResponse($oAuthResponse));
+            throw new HttpResponseException(new ErrorResponse($oAuthResponse->http()));
         }
 
         return $oAuthResponse;

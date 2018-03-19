@@ -119,7 +119,7 @@ class UriGenerator
      */
     public function addQuery(UriInterface $uri, array $params)
     {
-        $query = http_build_query($params);
+        $query = http_build_query($params, null, '&');
 
         $uri = $uri->withQuery($query);
 
