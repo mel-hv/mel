@@ -14,7 +14,7 @@ use Mel\HttpClient\ClientInterface;
 
 class Mel
 {
-    const VERSION = 0.1;
+    const VERSION = '0.2.0';
 
     /**
      * @var MeLiApp App configurations instance
