@@ -1,0 +1,9 @@
+{
+  "message": "This is a message error",
+  "error": "error_id",
+  "status": 502,
+  "cause": [
+    "second cause",
+    "first cause"
+  ]
+}

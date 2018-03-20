@@ -3,22 +3,47 @@
 namespace MelTests\Unit\Http\Responses;
 
 use Mel\Http\Responses\OAuthResponse;
-use MelTests\Unit\Fixtures\Responses\BarOAuthResponse;
 use MelTests\TestCase;
 
 class OAuthResponseTest extends TestCase
 {
-    public function testResponseReturnTokenData()
+    /**
+     * @var string
+     */
+    protected $bodyJson;
+
+    /**
+     * @var \Psr\Http\Message\ResponseInterface
+     */
+    protected $psrResponse;
+
+    /**
+     * @var oAuthResponse
+     */
+    protected $oAuthResponse;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp()
     {
-        $responseBody = (object)BarOAuthResponse::BODY_ARRAY_FORMAT;
-        $responseBody->scope = explode(' ', $responseBody->scope);
+        parent::setUp();
 
-        $oAuthResponse = new OAuthResponse(new BarOAuthResponse());
+        $this->bodyJson = $this->getJsonFileContent('oauth-response.json');
 
-        $this->assertEquals($responseBody->access_token, $oAuthResponse->accessToken());
-        $this->assertEquals($responseBody->token_type, $oAuthResponse->tokenType());
-        $this->assertEquals($responseBody->expires_in, $oAuthResponse->expiresIn());
-        $this->assertEquals($responseBody->refresh_token, $oAuthResponse->refreshToken());
-        $this->assertEquals($responseBody->scope, $oAuthResponse->scope());
+        $this->psrResponse = $this->createResponse($this->bodyJson);
+
+        $this->oAuthResponse = new OAuthResponse($this->psrResponse);
+    }
+
+    public function testShouldReturnResponseBodyValues()
+    {
+        $responseBody = json_decode($this->bodyJson);
+
+        $this->assertEquals($responseBody->access_token, $this->oAuthResponse->accessToken());
+        $this->assertEquals($responseBody->token_type, $this->oAuthResponse->tokenType());
+        $this->assertEquals($responseBody->expires_in, $this->oAuthResponse->expiresIn());
+        $this->assertEquals($responseBody->refresh_token, $this->oAuthResponse->refreshToken());
+        $this->assertEquals(explode(' ', $responseBody->scope), $this->oAuthResponse->scope());
     }
 }

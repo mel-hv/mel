@@ -138,4 +138,18 @@ class TestCase extends BaseTestCase
     {
         return MessageFactoryDiscovery::find()->createRequest($method, $uri, $headers, $body);
     }
+
+    /**
+     * Get json content of the file that is in directory fixtures/json
+     *
+     * @param $filePath
+     *
+     * @return bool|string
+     */
+    protected function getJsonFileContent($filePath)
+    {
+        $filePath = 'tests/Unit/Fixtures/json/' . trim($filePath, '/');
+
+        return file_get_contents($filePath);
+    }
 }

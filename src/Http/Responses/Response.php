@@ -9,7 +9,7 @@ class Response implements ResponseInterface
     /**
      * @var PsrResponseInterface
      */
-    protected $httpData;
+    protected $psrResponse;
 
     /**
      * @var array The decoded body of the http response
@@ -19,11 +19,11 @@ class Response implements ResponseInterface
     /**
      * Response constructor.
      *
-     * @param PsrResponseInterface $rawResponse Raw response used to build final response object
+     * @param PsrResponseInterface $psrResponse Raw response used to build final response object
      */
-    public function __construct(PsrResponseInterface $rawResponse)
+    public function __construct(PsrResponseInterface $psrResponse)
     {
-        $this->httpData = $rawResponse;
+        $this->psrResponse = $psrResponse;
 
         $this->decodedBody = json_decode($this, true);
     }
@@ -31,9 +31,25 @@ class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function http()
+    public function psrResponse()
     {
-        return $this->httpData;
+        return $this->psrResponse;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getStatusCode()
+    {
+        return $this->psrResponse->getStatusCode();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getBody()
+    {
+        return $this->psrResponse->getBody();
     }
 
     /**
@@ -55,7 +71,7 @@ class Response implements ResponseInterface
      */
     public function __toString()
     {
-        return $this->http()->getBody()->__toString();
+        return $this->psrResponse()->getBody()->__toString();
     }
 
     /**

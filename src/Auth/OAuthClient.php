@@ -53,18 +53,6 @@ class OAuthClient
     }
 
     /**
-     * Return if response has errors
-     *
-     * @param OAuthResponse $oAuthResponse
-     *
-     * @return bool
-     */
-    public function responseHasErrors(OAuthResponse $oAuthResponse)
-    {
-        return (is_null($oAuthResponse->accessToken()) || !is_null($oAuthResponse->get('error')));
-    }
-
-    /**
      * Requests access token to Mercado Libre
      *
      * @param $code
@@ -128,13 +116,11 @@ class OAuthClient
 
         $response = $httpClient->send('POST', self::OAUTH_ENDPOINT, $params);
 
-        $oAuthResponse = new OAuthResponse($response->http());
-
-        if ($this->responseHasErrors($oAuthResponse)) {
-            throw new HttpResponseException(new ErrorResponse($oAuthResponse->http()));
+        if (!$response instanceof OAuthResponse) {
+            throw new HttpResponseException(new ErrorResponse($response->psrResponse()));
         }
 
-        return $oAuthResponse;
+        return $response;
     }
 
     /**

@@ -3,8 +3,8 @@
 namespace Mel\HttpClient;
 
 use Http\Client\HttpClient;
-use Mel\Http\Responses\Response;
 use Http\Discovery\MessageFactoryDiscovery;
+use Mel\Http\Responses\ResponseFactory;
 use Psr\Http\Message\RequestInterface;
 
 class ApiClient implements ClientInterface
@@ -38,7 +38,7 @@ class ApiClient implements ClientInterface
     {
         $rawResponse = $this->httpClient->sendRequest($request);
 
-        return new Response($rawResponse);
+        return ResponseFactory::create($rawResponse);
     }
 
     /**
