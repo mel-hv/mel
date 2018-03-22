@@ -148,7 +148,7 @@ class TestCase extends BaseTestCase
      */
     protected function getJsonFileContent($filePath)
     {
-        $filePath = 'tests/Unit/Fixtures/json/' . trim($filePath, '/');
+        $filePath = 'tests/Unit/fixtures/json/' . trim($filePath, '/');
 
         return file_get_contents($filePath);
     }

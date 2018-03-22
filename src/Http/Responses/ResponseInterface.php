@@ -12,6 +12,13 @@ interface ResponseInterface
     public function psrResponse();
 
     /**
+     * Return original request sent
+     *
+     * @return null|\Psr\Http\Message\RequestInterface
+     */
+    public function psrRequest();
+
+    /**
      * Gets the response status code.
      *
      * @return int Status code.

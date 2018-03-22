@@ -36,9 +36,9 @@ class ApiClient implements ClientInterface
      */
     public function sendRequest(RequestInterface $request)
     {
-        $rawResponse = $this->httpClient->sendRequest($request);
+        $psrResponse = $this->httpClient->sendRequest($request);
 
-        return ResponseFactory::create($rawResponse);
+        return ResponseFactory::create($psrResponse, $request);
     }
 
     /**

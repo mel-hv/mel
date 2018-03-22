@@ -3,6 +3,7 @@
 namespace Mel\Http\Responses;
 
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
+use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 
 class Response implements ResponseInterface
 {
@@ -12,6 +13,11 @@ class Response implements ResponseInterface
     protected $psrResponse;
 
     /**
+     * @var null|PsrRequestInterface
+     */
+    protected $psrRequest;
+
+    /**
      * @var array The decoded body of the http response
      */
     protected $decodedBody;
@@ -19,11 +25,14 @@ class Response implements ResponseInterface
     /**
      * Response constructor.
      *
-     * @param PsrResponseInterface $psrResponse Raw response used to build final response object
+     * @param PsrResponseInterface     $psrResponse Raw response used to build final response object
+     * @param PsrRequestInterface|null $psrRequest
      */
-    public function __construct(PsrResponseInterface $psrResponse)
+    public function __construct(PsrResponseInterface $psrResponse, PsrRequestInterface $psrRequest = null)
     {
         $this->psrResponse = $psrResponse;
+
+        $this->psrRequest = $psrRequest;
 
         $this->decodedBody = json_decode($this, true);
     }
@@ -34,6 +43,14 @@ class Response implements ResponseInterface
     public function psrResponse()
     {
         return $this->psrResponse;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function psrRequest()
+    {
+        return $this->psrRequest;
     }
 
     /**

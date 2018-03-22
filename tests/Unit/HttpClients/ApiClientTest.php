@@ -7,7 +7,7 @@ use Mel\HttpClient\ApiClient;
 use Mel\Http\Responses\ResponseInterface;
 use MelTests\TestCase;
 
-class ClientTest extends TestCase
+class ApiClientTest extends TestCase
 {
 
     public function testSendValidRequest()

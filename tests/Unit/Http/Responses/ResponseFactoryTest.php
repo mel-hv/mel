@@ -10,15 +10,19 @@ use MelTests\TestCase;
 
 class ResponseFactoryTest extends TestCase
 {
-    public function testShouldCreateDefaultResponseIfOriginalResponseNotHasEspcialData()
+    public function testShouldCreateDefaultResponseUsingOriginalResponseAndRequest()
     {
         $psrResponse = $this->createResponse(
             '{"status":202,"message":"Simple Message"}'
         );
 
-        $response = ResponseFactory::create($psrResponse);
+        $psrRequest = $this->createRequest('GET', '/');
+
+        $response = ResponseFactory::create($psrResponse, $psrRequest);
 
         $this->assertInstanceOf(Response::class, $response);
+        $this->assertSame($psrResponse, $response->psrResponse());
+        $this->assertSame($psrRequest, $response->psrRequest());
     }
 
 

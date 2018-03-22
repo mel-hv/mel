@@ -4,6 +4,7 @@ namespace MelTests\Unit\Http\Responses;
 
 use Mel\Http\Responses\Response;
 use MelTests\TestCase;
+use Psr\Http\Message\RequestInterface as PsrRequestInterface;
 use Psr\Http\Message\ResponseInterface as PsrResponseInterface;
 
 class ResponseTest extends TestCase
@@ -19,6 +20,11 @@ class ResponseTest extends TestCase
     protected $psrResponse;
 
     /**
+     * @var \Psr\Http\Message\RequestInterface
+     */
+    protected $psrRequest;
+
+    /**
      * @var Response
      */
     protected $melResponse;
@@ -32,13 +38,22 @@ class ResponseTest extends TestCase
 
         $this->psrResponse = $this->createResponse($this->bodyJson);
 
-        $this->melResponse = new Response($this->psrResponse);
+        $this->psrRequest = $this->createRequest('GET', '/');
+
+        $this->melResponse = new Response($this->psrResponse, $this->psrRequest);
     }
 
     public function testGetOriginalResponseUsedToBuildObject()
     {
         $this->assertEquals(202, $this->melResponse->getStatusCode());
         $this->assertInstanceOf(PsrResponseInterface::class, $this->melResponse->psrResponse());
+        $this->assertSame($this->psrResponse, $this->melResponse->psrResponse());
+    }
+
+    public function testGetTheOriginalRequestSent()
+    {
+        $this->assertInstanceOf(PsrRequestInterface::class, $this->melResponse->psrRequest());
+        $this->assertSame($this->psrRequest, $this->melResponse->psrRequest());
     }
 
     public function testShouldReturnResponseBodyValue()
