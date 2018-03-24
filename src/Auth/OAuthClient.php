@@ -4,7 +4,6 @@ namespace Mel\Auth;
 
 use Mel\Mel;
 use Mel\Exceptions\MelException;
-use Mel\Http\Responses\ErrorResponse;
 use Mel\Http\Responses\OAuthResponse;
 use Mel\Exceptions\HttpResponseException;
 
@@ -117,7 +116,7 @@ class OAuthClient
         $response = $httpClient->send('POST', self::OAUTH_ENDPOINT, $params);
 
         if (!$response instanceof OAuthResponse) {
-            throw new HttpResponseException(new ErrorResponse($response->psrResponse()));
+            throw new HttpResponseException('', $response);
         }
 
         return $response;

@@ -2,70 +2,98 @@
 
 namespace Mel\Exceptions;
 
-use Mel\Http\Responses\ErrorResponse;
+use Mel\Http\Responses\Response;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 
 class HttpResponseException extends MelException
 {
     /**
-     * @var ErrorResponse Error response instance
+     * @var RequestInterface
      */
-    protected $errorResponse;
+    protected $psrRequest;
+
+    /**
+     * @var ResponseInterface
+     */
+    protected $psrResponse;
+
+    /**
+     * @var array Response body
+     */
+    protected $responseBody = [];
 
     /**
      * HttpResponseException constructor.
-     * @param ErrorResponse $errorResponse
-     */
-    public function __construct(ErrorResponse $errorResponse)
-    {
-        $this->errorResponse = $errorResponse;
-        parent::__construct($this->errorResponse->getMessageError(), $this->errorResponse->getErrorStatus());
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function __toString()
-    {
-        return $this->getMessage();
-    }
-
-    /**
-     * Return error identify
      *
-     * @return string|null
+     * @param string          $message
+     * @param Response        $response
+     * @param \Exception|null $previous
      */
-    public function getErrorId()
+    public function __construct($message, Response $response, \Exception $previous = null)
     {
-        return $this->errorResponse->getErrorId();
+        $this->psrRequest = $response->psrRequest();
+        $this->psrResponse = $response->psrResponse();
+
+        $this->responseBody = (array) $response->get();
+
+        $message = $message ?: $this->getResponseBody('message', $message);
+
+        parent::__construct($message, $response->getStatusCode(), $previous);
+    }
+
+    public function getResponseBody($key, $default = null)
+    {
+        return (array_key_exists($key, $this->responseBody)) ? $this->responseBody[$key] : $default;
     }
 
     /**
-     * Return error code status
+     * Return original http request
      *
-     * @return string|integer|null
+     * @return null|\Psr\Http\Message\RequestInterface Request using psr contract
+     */
+    public function getPsrRequest()
+    {
+        return $this->psrRequest;
+    }
+
+    /**
+     * Return original http response
+     *
+     * @return \Psr\Http\Message\ResponseInterface Response using psr contract
+     */
+    public function getPsrResponse()
+    {
+        return $this->psrResponse;
+    }
+
+    /**
+     * Return error code
+     *
+     * @return int The code of the error, is also the HTTP status code for the error
      */
     public function getErrorStatus()
     {
-        return $this->errorResponse->getErrorStatus();
+        return $this->getCode();
     }
 
     /**
-     * Return error causes
+     * Return error id
      *
-     * @return array|null
+     * @return string|null Error id used by Mercado Libre to identify error
      */
-    public function getErrorCause()
+    public function getErrorId()
     {
-        return $this->errorResponse->getErrorCause();
+        return $this->getResponseBody('error');
     }
 
     /**
-     * Return response instance
+     * Return causes of the error
      *
-     * @return ErrorResponse
+     * @return array Causes of error pointed out by Mercado Libre
      */
-    public function getHttpResponse()
+    public function getErrorCauses()
     {
-        return $this->errorResponse;
+        return $this->getResponseBody('cause', []);
     }
 }
