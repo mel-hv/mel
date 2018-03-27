@@ -3,9 +3,10 @@
 namespace Mel\Auth;
 
 use Mel\Mel;
-use Mel\Exceptions\MelException;
-use Mel\Http\Responses\OAuthResponse;
+use Mel\Http\ResponseManager;
 use Mel\Exceptions\HttpResponseException;
+use Mel\Exceptions\MelException;
+use Psr\Http\Message\ResponseInterface;
 
 class OAuthClient
 {
@@ -56,7 +57,7 @@ class OAuthClient
      *
      * @param $code
      *
-     * @return OAuthResponse
+     * @return ResponseInterface
      * @throws HttpResponseException
      * @throws MelException
      */
@@ -68,7 +69,7 @@ class OAuthClient
             throw new MelException('Use a valid code');
         }
 
-        $oAuthResponse = $this->requestToken([
+        $response = $this->requestToken([
             "grant_type"    => "authorization_code",
             "client_id"     => $this->meLiApp->clientId(),
             "client_secret" => $this->meLiApp->secretKey(),
@@ -76,29 +77,29 @@ class OAuthClient
             "code"          => $code,
         ]);
 
-        $this->saveToken($oAuthResponse);
+        $this->saveToken($response);
 
-        return $oAuthResponse;
+        return $response;
     }
 
     /**
      * Refresh access token used to authorize request in Mercado Libre
      *
-     * @return OAuthResponse
+     * @return ResponseInterface
      * @throws HttpResponseException
      */
     public function refreshAccessToken()
     {
-        $oAuthResponse = $this->requestToken([
+        $response = $this->requestToken([
             "grant_type"    => "refresh_token",
             "client_id"     => $this->meLiApp->clientId(),
             "client_secret" => $this->meLiApp->secretKey(),
             "refresh_token" => $this->mel->accessToken()->getRefreshToken(),
         ]);
 
-        $this->saveToken($oAuthResponse);
+        $this->saveToken($response);
 
-        return $oAuthResponse;
+        return $response;
     }
 
     /**
@@ -106,18 +107,17 @@ class OAuthClient
      *
      * @param array $params
      *
-     * @return OAuthResponse
-     * @throws HttpResponseException
+     * @return ResponseInterface
      */
     protected function requestToken(array $params)
     {
         $httpClient = $this->mel->httpClient();
 
-        $response = $httpClient->send('POST', self::OAUTH_ENDPOINT, $params);
-
-        if (!$response instanceof OAuthResponse) {
-            throw new HttpResponseException('', $response);
-        }
+        $response = $httpClient->post(self::OAUTH_ENDPOINT, [], json_encode($params));
+//
+//        if (!$response instanceof OAuthResponse) {
+//            throw new HttpResponseException('', $response);
+//        }
 
         return $response;
     }
@@ -125,14 +125,16 @@ class OAuthClient
     /**
      * Save access token and others important data
      *
-     * @param OAuthResponse $oAuthResponse
+     * @param ResponseInterface $response
      */
-    protected function saveToken(OAuthResponse $oAuthResponse)
+    protected function saveToken(ResponseInterface $response)
     {
+        $response = ResponseManager::toObject($response);
+
         $accessToken = $this->mel->accessToken();
 
-        $accessToken->setToken($oAuthResponse->accessToken());
-        $accessToken->setRefreshToken($oAuthResponse->refreshToken());
-        $accessToken->setExpiresIn($oAuthResponse->expiresIn());
+        $accessToken->setToken($response->access_token);
+        $accessToken->setRefreshToken($response->refresh_token);
+        $accessToken->setExpiresIn($response->expires_in);
     }
 }

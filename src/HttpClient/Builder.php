@@ -5,6 +5,8 @@ namespace Mel\HttpClient;
 use Mel\Mel;
 use Mel\Http\UriGenerator;
 use Http\Client\HttpClient;
+use Http\Client\Common\HttpMethodsClient;
+use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Client\Common\Plugin;
 use Http\Client\Common\PluginClient;
@@ -16,7 +18,7 @@ class Builder
     /**
      * The object that sends HTTP messages.
      *
-     * @var HttpClient
+     * @var HttpMethodsClient
      */
     protected $httpClient;
 
@@ -78,12 +80,15 @@ class Builder
     /**
      * Get http client instance
      *
-     * @return PluginClient
+     * @return HttpMethodsClient
      */
     public function getHttpClient()
     {
         if (!$this->pluginClient) {
-            $this->pluginClient = new PluginClient($this->httpClient, $this->plugins);
+            $this->pluginClient = new HttpMethodsClient(
+                new PluginClient($this->httpClient, $this->plugins),
+                MessageFactoryDiscovery::find()
+            );
         }
         return $this->pluginClient;
     }

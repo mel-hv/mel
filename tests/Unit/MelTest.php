@@ -2,11 +2,11 @@
 
 namespace MelTests\Unit;
 
+use Http\Client\HttpClient;
 use Mel\Auth\AccessTokenInterface;
 use Mel\Auth\OAuthClient;
 use Mel\Country;
 use Mel\HttpClient\Builder;
-use Mel\HttpClient\ClientInterface;
 use Mel\Mel;
 use Mel\MeLiApp;
 use MelTests\TestCase;
@@ -79,8 +79,10 @@ class MelTest extends TestCase
 
         $client2 = $mel->httpClient($builderClient);
 
-        $this->assertInstanceOf(ClientInterface::class, $client1);
-        $this->assertInstanceOf(ClientInterface::class, $client2);
+        $this->assertInstanceOf(HttpClient::class, $client1);
+        $this->assertInstanceOf(HttpClient::class, $client2);
+
+        $this->assertAttributeInstanceOf(Builder::class, 'builderClient', $mel);
 
         $this->assertNotSame($client1, $client2);
     }

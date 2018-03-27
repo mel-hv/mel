@@ -2,10 +2,10 @@
 
 namespace MelTests\Unit\HttpClients;
 
-use Http\Discovery\UriFactoryDiscovery;
 use Mel\HttpClient\Builder;
+use Http\Client\Common\HttpMethodsClient;
+use Http\Discovery\UriFactoryDiscovery;
 use Http\Client\Common\Plugin;
-use Http\Client\HttpClient;
 use Mel\Mel;
 use Mockery;
 use MelTests\TestCase;
@@ -28,7 +28,7 @@ class BuilderTest extends TestCase
 
     public function testHttpClientShouldBeAnHttpMethodsClient()
     {
-        $this->assertInstanceOf(HttpClient::class, $this->builderClient->getHttpClient());
+        $this->assertInstanceOf(HttpMethodsClient::class, $this->builderClient->getHttpClient());
     }
 
     public function testAddPluginShouldCreateNewHttpClientInstance()

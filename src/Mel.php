@@ -2,15 +2,13 @@
 
 namespace Mel;
 
-use Mel\Auth\AccessToken;
+use Mel\HttpClient\Builder as BuilderClient;
 use Mel\Auth\AccessTokenInterface;
+use Mel\Auth\AccessToken;
 use Mel\Auth\OAuthClient;
 use Mel\Auth\Storage\SessionStorage;
 use Mel\Exceptions\MelException;
 use Mel\Http\UriGenerator;
-use Mel\HttpClient\Builder as BuilderClient;
-use Mel\HttpClient\ApiClient;
-use Mel\HttpClient\ClientInterface;
 
 class Mel
 {
@@ -27,9 +25,9 @@ class Mel
     protected $country;
 
     /**
-     * @var ClientInterface Http client instance
+     * @var BuilderClient Http client instance
      */
-    protected $httpClient;
+    protected $builderClient;
 
     /**
      * @var OAuthClient Client OAuth
@@ -68,7 +66,7 @@ class Mel
             throw new MelException('Authenticated mode require a country');
         }
 
-        $this->httpClient = $this->httpClient();
+        $this->httpClient();
 
         if (!$this->meLiApp()->isAnonymousClient()) {
             $this->oAuthClient = new OAuthClient($this);
@@ -94,17 +92,15 @@ class Mel
      *
      * @param BuilderClient|null $builder
      *
-     * @return ClientInterface
+     * @return \Http\Client\Common\HttpMethodsClient
      */
     public function httpClient(BuilderClient $builder = null)
     {
-        if (!$this->httpClient || $builder) {
-            $builder = $builder ?: BuilderClient::create($this);
-
-            $this->httpClient = new ApiClient($builder);
+        if ($builder || !$this->builderClient) {
+            $this->builderClient = $builder ?: BuilderClient::create($this);
         }
 
-        return $this->httpClient;
+        return $this->builderClient->getHttpClient();
     }
 
     /**
