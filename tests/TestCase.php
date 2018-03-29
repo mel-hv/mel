@@ -2,15 +2,15 @@
 
 namespace MelTests;
 
-use Http\Mock\Client;
 use Mel\Mel;
 use Mel\MeLiApp;
 use Mel\Country;
-use Mockery;
-use PHPUnit\Framework\TestCase as BaseTestCase;
 use Http\Discovery\Strategy\MockClientStrategy;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\HttpClientDiscovery;
+use PHPUnit\Framework\TestCase as BaseTestCase;
+use Http\Mock\Client;
+use Mockery;
 
 class TestCase extends BaseTestCase
 {
@@ -148,8 +148,16 @@ class TestCase extends BaseTestCase
      */
     protected function getJsonFileContent($filePath)
     {
-        $filePath = 'tests/Unit/fixtures/json/' . trim($filePath, '/');
+        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
 
-        return file_get_contents($filePath);
+        $filePath = 'tests/Unit/fixtures/json/' . trim($filePath, '/');
+        $filePath = empty($extension) ? $filePath . '.json' : $filePath;
+
+        $json = file_get_contents($filePath);
+
+        //Remove line breaks
+        $json = str_replace(["\r", "\n"], "", $json);
+
+        return $json;
     }
 }
