@@ -77,7 +77,8 @@ class MelTest extends TestCase
 
         $client1 = $mel->httpClient();
 
-        $client2 = $mel->httpClient($builderClient);
+        $mel->setHttpClientBuilder($builderClient);
+        $client2 = $mel->httpClient();
 
         $this->assertInstanceOf(HttpClient::class, $client1);
         $this->assertInstanceOf(HttpClient::class, $client2);

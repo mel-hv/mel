@@ -66,40 +66,34 @@ class Mel
             throw new MelException('Authenticated mode require a country');
         }
 
-        $this->httpClient();
+        $this->accessToken = $accessToken ?: new AccessToken(new SessionStorage());
+
+        $this->uriGenerator = new UriGenerator($this);
+
+        $this->setHttpClientBuilder(BuilderClient::create($this));
 
         if (!$this->meLiApp()->isAnonymousClient()) {
             $this->oAuthClient = new OAuthClient($this);
         }
-
-        $this->accessToken = $accessToken ?: new AccessToken(new SessionStorage());
-
-        $this->uriGenerator = new UriGenerator($this);
     }
 
     /**
-     * Return MeLiApp instance
+     * Set Client Builder
      *
-     * @return MeLiApp
+     * @param BuilderClient $builder
      */
-    public function meLiApp()
+    public function setHttpClientBuilder(BuilderClient $builder)
     {
-        return $this->meLiApp;
+        $this->builderClient = $builder;
     }
 
     /**
      * Return http client
      *
-     * @param BuilderClient|null $builder
-     *
      * @return \Http\Client\Common\HttpMethodsClient
      */
-    public function httpClient(BuilderClient $builder = null)
+    public function httpClient()
     {
-        if ($builder || !$this->builderClient) {
-            $this->builderClient = $builder ?: BuilderClient::create($this);
-        }
-
         return $this->builderClient->getHttpClient();
     }
 
@@ -111,6 +105,16 @@ class Mel
     public function oAuthClient()
     {
         return $this->oAuthClient;
+    }
+
+    /**
+     * Return MeLiApp instance
+     *
+     * @return MeLiApp
+     */
+    public function meLiApp()
+    {
+        return $this->meLiApp;
     }
 
     /**

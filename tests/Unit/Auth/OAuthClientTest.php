@@ -47,7 +47,8 @@ class OAuthClientTest extends TestCase
 
         $mel = $this->getMel();
         $builderClientTest = Builder::create($mel, $this->mockClient);
-        $mel->httpClient($builderClientTest);
+        $mel->setHttpClientBuilder($builderClientTest);
+        $mel->httpClient();
 
         // Act
         $oAuthClient = new OAuthClient($mel);
@@ -126,7 +127,8 @@ class OAuthClientTest extends TestCase
 
         $mel = $this->getMel();
         $builderClientTest = Builder::create($mel, $this->mockClient);
-        $mel->httpClient($builderClientTest);
+        $mel->setHttpClientBuilder($builderClientTest);
+        $mel->httpClient();
 
         // Act
         $oAuthClient = new OAuthClient($mel);
