@@ -16,8 +16,8 @@ trait GetAllHelper
     public function getAll()
     {
         $path = $this->getPath('get-all');
-        $list = $this->httpClient()->get($path);
+        $response = $this->httpClient()->get($path);
 
-        return $this->hydrate($list);
+        return $this->hydrate($response);
     }
 }

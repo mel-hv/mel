@@ -22,7 +22,6 @@ class UriGeneratorTest extends TestCase
         $this->uriGenerator = new UriGenerator($this->getMel());
     }
 
-
     public function testShouldCreateUriInstanceWithCorrectlyEndpointAndParametersToUseInApiAccess()
     {
         $uri = $this->uriGenerator->createApiUri(
