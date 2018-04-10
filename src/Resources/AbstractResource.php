@@ -16,6 +16,8 @@ abstract class AbstractResource implements \ArrayAccess
     protected $attributes = [];
 
     /**
+     * Create a collection of resources from psr response
+     *
      * @param ResponseInterface $response
      *
      * @return Collection
@@ -78,6 +80,8 @@ abstract class AbstractResource implements \ArrayAccess
     }
 
     /**
+     * Fill the resource with an array of attributes.
+     *
      * @param array $attributes
      *
      * @return $this
@@ -202,6 +206,8 @@ abstract class AbstractResource implements \ArrayAccess
     }
 
     /**
+     * Dynamically set attributes on the resource
+     *
      * @param       $key
      * @param mixed $value
      */
