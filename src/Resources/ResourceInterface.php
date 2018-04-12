@@ -14,4 +14,16 @@ interface ResourceInterface
      * @return \Mel\Collection\Collection
      */
     public function hydrate(ResponseInterface $response);
+
+    /**
+     * Create URI using string endpoint with variables in segments
+     * Segment format e.g.: /path/{variable}
+     *
+     * @param string $path
+     * @param array  $parameters
+     * @param array  $query
+     *
+     * @return \Psr\Http\Message\UriInterface
+     */
+    public function createUri($path, array $parameters = [], array $query = []);
 }

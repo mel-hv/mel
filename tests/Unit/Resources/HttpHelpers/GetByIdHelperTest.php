@@ -43,7 +43,7 @@ class GetByIdHelperStub
 {
     use GetByIdHelper;
 
-    public $path = [
+    public $paths = [
         'get-by-id' => '/currencies/{id}',
     ];
 

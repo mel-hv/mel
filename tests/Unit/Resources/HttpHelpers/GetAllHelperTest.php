@@ -41,7 +41,7 @@ class GetAllHelperStub
 {
     use GetAllHelper;
 
-    public $path = [
+    public $paths = [
         'get-all' => '/currencies',
     ];
 

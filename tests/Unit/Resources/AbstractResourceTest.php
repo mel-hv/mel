@@ -10,42 +10,53 @@ use MelTests\TestCase;
 
 class AbstractResourceTest extends TestCase
 {
+    /**
+     * @var BasicStubResource
+     */
+    protected $abstractResource;
+
+    /**
+     * @inheritDoc
+     */
+    protected function setUp()
+    {
+        parent::setUp();
+        $mel = $this->getMel($this->mockClient);
+
+        $this->abstractResource = new BasicStubResource($mel);
+    }
+
+
     public function testShouldSaveAndReturnResourceAttributesDynamically()
     {
-        $resource = new BasicStubResource($this->melMock);
+        $this->abstractResource->id = 42;
 
-        $resource->id = 42;
+        $this->assertEquals(42, $this->abstractResource->id);
+        $this->assertTrue(isset($this->abstractResource->id));
 
-        $this->assertEquals(42, $resource->id);
-        $this->assertTrue(isset($resource->id));
-
-        unset($resource->id);
-        $this->assertFalse(isset($resource->id));
+        unset($this->abstractResource->id);
+        $this->assertFalse(isset($this->abstractResource->id));
 
     }
 
     public function testShouldSaveAndReturnAttributesUsingArrayAccess()
     {
-        $resource = new BasicStubResource($this->melMock);
+        $this->abstractResource['id'] = 42;
 
-        $resource['id'] = 42;
-
-        $this->assertEquals(42, $resource['id']);
-        $this->assertTrue(isset($resource['id']));
+        $this->assertEquals(42, $this->abstractResource['id']);
+        $this->assertTrue(isset($this->abstractResource['id']));
 
 
-        unset($resource['id']);
-        $this->assertFalse(isset($resource['id']));
+        unset($this->abstractResource['id']);
+        $this->assertFalse(isset($this->abstractResource['id']));
     }
 
     public function testSaveAndReturnAttributesWithCustomFormats()
     {
-        $resource = new BasicStubResource($this->melMock);
+        $this->abstractResource->permalink = $this->apiUri;
 
-        $resource->permalink = $this->apiUri;
-
-        $this->assertInstanceOf(UriInterface::class, $resource->permalink);
-        $this->assertEquals($this->apiUri, $resource->permalink_string);
+        $this->assertInstanceOf(UriInterface::class, $this->abstractResource->permalink);
+        $this->assertEquals($this->apiUri, $this->abstractResource->permalink_string);
     }
 
     public function testShouldCreateACollectionUsingAHttpResponseWithMultiplesItems()
@@ -56,8 +67,7 @@ class AbstractResourceTest extends TestCase
 
         $currenciesArray = json_decode($this->getJsonFileContent('currencies/currencies-list'), true);
 
-        $resource = new BasicStubResource($this->melMock);
-        $collection = $resource->hydrate($response);
+        $collection = $this->abstractResource->hydrate($response);
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertEquals(count($currenciesArray), $collection->size());
@@ -72,8 +82,7 @@ class AbstractResourceTest extends TestCase
 
         $currencyArray = json_decode($this->getJsonFileContent('currencies/single-currency'), true);
 
-        $resource = new BasicStubResource($this->melMock);
-        $collection = $resource->hydrate($response);
+        $collection = $this->abstractResource->hydrate($response);
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertEquals(1, $collection->size());

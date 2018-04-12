@@ -1,0 +1,72 @@
+{
+  "total": 1,
+  "limit": 50,
+  "questions": [
+    {
+      "date_created": "2016-02-29T11:09:30.000-04:00",
+      "item_id": "MLA608007087",
+      "seller_id": 202593498,
+      "status": "UNANSWERED",
+      "text": "Test question.",
+      "id": 3957002293,
+      "deleted_from_listing": false,
+      "hold": false,
+      "answer": null,
+      "from": {
+        "id": 207119838,
+        "answered_questions": 0
+      }
+    }
+  ],
+  "filters": {
+    "limit": 50,
+    "offset": 0,
+    "is_admin": false,
+    "sorts": [
+    ],
+    "caller": 202593498,
+    "item": "MLA608007087"
+  },
+  "available_filters": [
+    {
+      "id": "from",
+      "name": "From user id",
+      "type": "number"
+    },
+    {
+      "id": "seller",
+      "name": "Seller id",
+      "type": "number"
+    },
+    {
+      "id": "totalDivisions",
+      "name": "total divisions",
+      "type": "number"
+    },
+    {
+      "id": "division",
+      "name": "Division",
+      "type": "number"
+    },
+    {
+      "id": "status",
+      "name": "Status",
+      "type": "text",
+      "values": [
+        "ANSWERED",
+        "BANNED",
+        "CLOSED_UNANSWERED",
+        "DELETED",
+        "DISABLED",
+        "UNANSWERED",
+        "UNDER_REVIEW"
+      ]
+    }
+  ],
+  "available_sorts": [
+    "item_id",
+    "from_id",
+    "date_created",
+    "seller_id"
+  ]
+}

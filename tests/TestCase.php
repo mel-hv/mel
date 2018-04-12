@@ -5,11 +5,12 @@ namespace MelTests;
 use Mel\Mel;
 use Mel\MeLiApp;
 use Mel\Country;
+use Mel\HttpClient\Builder;
 use Http\Discovery\Strategy\MockClientStrategy;
 use Http\Discovery\MessageFactoryDiscovery;
 use Http\Discovery\HttpClientDiscovery;
 use PHPUnit\Framework\TestCase as BaseTestCase;
-use Http\Mock\Client;
+use Http\Mock\Client as MockClient;
 use Mockery;
 
 class TestCase extends BaseTestCase
@@ -67,7 +68,7 @@ class TestCase extends BaseTestCase
 
         $this->melMock = Mockery::mock(Mel::class);
 
-        $this->mockClient = new Client();
+        $this->mockClient = new MockClient();
 
         HttpClientDiscovery::prependStrategy(MockClientStrategy::class);
     }
@@ -84,15 +85,20 @@ class TestCase extends BaseTestCase
     /**
      * Return Mel instance
      *
+     * @param MockClient|null $mockClient
+     *
      * @return Mel
-     * @throws \Exception
      * @throws \Mel\Exceptions\MelException
      */
-    protected function getMel()
+    protected function getMel(MockClient $mockClient = null)
     {
         $meLiApp = new MeLiApp($this->appId, $this->secretKey, $this->redirectUri);
 
         $mel = new Mel($meLiApp, new Country(Country::BRASIL));
+
+        if ($mockClient) {
+            $mel->setHttpClientBuilder(Builder::create($mel, $this->mockClient));
+        }
 
         return $mel;
     }

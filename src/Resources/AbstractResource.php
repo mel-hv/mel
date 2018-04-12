@@ -3,17 +3,28 @@
 namespace Mel\Resources;
 
 use Mel\Mel;
+use Mel\Http\UriGenerator;
 use Mel\Collection\Collection;
 use Psr\Http\Message\ResponseInterface;
 use Stringy\Stringy;
 use ArrayAccess;
 
-abstract class AbstractResource implements  ResourceInterface, ArrayAccess
+abstract class AbstractResource implements ResourceInterface, ArrayAccess
 {
     /**
      * @var Mel Main container instance
      */
     protected $mel;
+
+    /**
+     * @var \Http\Client\Common\HttpMethodsClient
+     */
+    protected $httpClient;
+
+    /**
+     * @var \Mel\Http\UriGenerator;
+     */
+    protected $uriGenerator;
 
     /**
      * List of the attributes
@@ -31,9 +42,44 @@ abstract class AbstractResource implements  ResourceInterface, ArrayAccess
     {
         $this->mel = $mel;
 
-        if (method_exists($this, 'initHelpers')) {
-            $this->initHelpers($this->mel);
+        $this->httpClient = $this->mel->httpClient();
+        $this->uriGenerator = $this->mel->uriGenerator();
+    }
+
+    /**
+     * Get HttpClient instance
+     *
+     * @return \Http\Client\Common\HttpMethodsClient
+     */
+    protected function httpClient()
+    {
+        return $this->httpClient;
+    }
+
+    /**
+     * Get UriGenerator instance
+     *
+     * @return UriGenerator
+     */
+    protected function uriGenerator()
+    {
+        return $this->uriGenerator;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function createUri($path, array $parameters = [], array $query = [])
+    {
+        foreach ($parameters as $parameter => $replacement) {
+            $pattern = '/(?:[{])(?:' . $parameter . ')(?:[}])/';
+
+            $path = preg_replace($pattern, $replacement, $path);
         }
+
+        $uri = $this->uriGenerator->createUri($path, null, $query);
+
+        return $uri;
     }
 
     /**

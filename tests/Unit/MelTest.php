@@ -2,13 +2,13 @@
 
 namespace MelTests\Unit;
 
-use Http\Client\HttpClient;
-use Mel\Auth\AccessTokenInterface;
-use Mel\Auth\OAuthClient;
-use Mel\Country;
-use Mel\HttpClient\Builder;
 use Mel\Mel;
 use Mel\MeLiApp;
+use Mel\Country;
+use Mel\HttpClient\Builder;
+use Http\Client\HttpClient;
+use Mel\Auth\OAuthClient;
+use Mel\Auth\AccessTokenInterface;
 use MelTests\TestCase;
 
 class MelTest extends TestCase

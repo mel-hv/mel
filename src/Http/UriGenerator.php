@@ -61,7 +61,7 @@ class UriGenerator
 
     /**
      * Create URI using string endpoint with variables in segments
-     * Segment format e.g.: /path/:variable
+     * Segment format e.g.: /path/{variable}
      *
      * @param string $path
      * @param array  $parameters

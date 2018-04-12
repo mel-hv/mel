@@ -9,8 +9,7 @@ trait GetAllHelper
     /**
      * Get a collection of the resources
      *
-     * @return \DusanKasan\Knapsack\Collection
-     * @throws \Http\Client\Exception
+     * @return \Mel\Collection\Collection
      * @throws \Mel\Exceptions\MelException
      */
     public function getAll()
