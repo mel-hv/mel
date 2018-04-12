@@ -2,18 +2,39 @@
 
 namespace Mel\Resources;
 
-use DusanKasan\Knapsack\Collection;
+use Mel\Mel;
+use Mel\Collection\Collection;
 use Psr\Http\Message\ResponseInterface;
 use Stringy\Stringy;
+use ArrayAccess;
 
-abstract class AbstractResource implements \ArrayAccess
+abstract class AbstractResource implements  ResourceInterface, ArrayAccess
 {
+    /**
+     * @var Mel Main container instance
+     */
+    protected $mel;
+
     /**
      * List of the attributes
      *
      * @var array
      */
     protected $attributes = [];
+
+    /**
+     * AbstractResource constructor.
+     *
+     * @param Mel $mel
+     */
+    public function __construct(Mel $mel)
+    {
+        $this->mel = $mel;
+
+        if (method_exists($this, 'initHelpers')) {
+            $this->initHelpers($this->mel);
+        }
+    }
 
     /**
      * Create a collection of resources from psr response
@@ -70,7 +91,7 @@ abstract class AbstractResource implements \ArrayAccess
      */
     public function newInstance(array $attributes = [])
     {
-        $instance = new static();
+        $instance = new static($this->mel);
 
         if (!empty($attributes)) {
             $instance->fill($attributes);

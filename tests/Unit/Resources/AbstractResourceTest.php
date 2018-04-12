@@ -12,7 +12,7 @@ class AbstractResourceTest extends TestCase
 {
     public function testShouldSaveAndReturnResourceAttributesDynamically()
     {
-        $resource = new BasicStubResource();
+        $resource = new BasicStubResource($this->melMock);
 
         $resource->id = 42;
 
@@ -26,7 +26,7 @@ class AbstractResourceTest extends TestCase
 
     public function testShouldSaveAndReturnAttributesUsingArrayAccess()
     {
-        $resource = new BasicStubResource();
+        $resource = new BasicStubResource($this->melMock);
 
         $resource['id'] = 42;
 
@@ -40,7 +40,7 @@ class AbstractResourceTest extends TestCase
 
     public function testSaveAndReturnAttributesWithCustomFormats()
     {
-        $resource = new BasicStubResource();
+        $resource = new BasicStubResource($this->melMock);
 
         $resource->permalink = $this->apiUri;
 
@@ -56,7 +56,7 @@ class AbstractResourceTest extends TestCase
 
         $currenciesArray = json_decode($this->getJsonFileContent('currencies/currencies-list'), true);
 
-        $resource = new BasicStubResource();
+        $resource = new BasicStubResource($this->melMock);
         $collection = $resource->hydrate($response);
 
         $this->assertInstanceOf(Collection::class, $collection);
@@ -72,7 +72,7 @@ class AbstractResourceTest extends TestCase
 
         $currencyArray = json_decode($this->getJsonFileContent('currencies/single-currency'), true);
 
-        $resource = new BasicStubResource();
+        $resource = new BasicStubResource($this->melMock);
         $collection = $resource->hydrate($response);
 
         $this->assertInstanceOf(Collection::class, $collection);
