@@ -166,4 +166,24 @@ class TestCase extends BaseTestCase
 
         return $json;
     }
+
+    /**
+     * Invoke a protected method of the object
+     *
+     * @param object $object
+     * @param string $method
+     * @param array|null   $parameters
+     *
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    protected function invokeProtectedMethod($object, $method, $parameters = null)
+    {
+        $reflectionClass = new \ReflectionClass(get_class($object));
+
+        $method = $reflectionClass->getMethod($method);
+        $method->setAccessible(true);
+
+        return $method->invoke($object, ...$parameters);
+    }
 }
