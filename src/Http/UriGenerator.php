@@ -60,29 +60,6 @@ class UriGenerator
     }
 
     /**
-     * Create URI using string endpoint with variables in segments
-     * Segment format e.g.: /path/{variable}
-     *
-     * @param string $path
-     * @param array  $parameters
-     * @param array  $query
-     *
-     * @return UriGenerator|UriInterface
-     */
-    public function resolveEndPointPath($path, array $parameters = [], array $query = [])
-    {
-        foreach ($parameters as $parameter => $replacement) {
-            $pattern = '/(?:[{])(?:' . $parameter . ')(?:[}])/';
-
-            $path = preg_replace($pattern, $replacement, $path);
-        }
-
-        $uri = $this->createUri($path, null, $query);
-
-        return $uri;
-    }
-
-    /**
      * Creates an PSR-7 URI
      *
      * @param string|UriInterface $uri

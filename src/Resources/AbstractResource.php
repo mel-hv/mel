@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 use Stringy\Stringy;
 use ArrayAccess;
 
-abstract class AbstractResource implements ResourceInterface, ArrayAccess
+abstract class AbstractResource implements ArrayAccess
 {
     /**
      * @var Mel Main container instance
@@ -67,9 +67,16 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
     }
 
     /**
-     * @inheritDoc
+     * Create URI using string endpoint with variables in segments
+     * Segment format e.g.: /path/{variable}
+     *
+     * @param string $path
+     * @param array  $parameters
+     * @param array  $query
+     *
+     * @return \Psr\Http\Message\UriInterface
      */
-    public function createUri($path, array $parameters = [], array $query = [])
+    protected function createUri($path, array $parameters = [], array $query = [])
     {
         foreach ($parameters as $parameter => $replacement) {
             $pattern = '/(?:[{])(?:' . $parameter . ')(?:[}])/';
@@ -87,9 +94,9 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
      *
      * @param ResponseInterface $response
      *
-     * @return Collection
+     * @return \Mel\Collection\Collection
      */
-    public function hydrate(ResponseInterface $response)
+    protected function hydrate(ResponseInterface $response)
     {
         $decodedResponse = $this->resolveJsonResponse($response->getBody()->__toString());
 
@@ -275,8 +282,8 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
     /**
      * Dynamically set attributes on the resource
      *
-     * @param       $key
-     * @param mixed $value
+     * @param string $key
+     * @param mixed  $value
      */
     public function __set($key, $value)
     {
@@ -298,7 +305,7 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
     /**
      * Unset an attribute on the resource
      *
-     * @param $key
+     * @param string $key
      */
     public function __unset($key)
     {
@@ -320,8 +327,8 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
     /**
      * Set the value for a given offset
      *
-     * @param mixed $offset
-     * @param mixed $value
+     * @param string $offset
+     * @param mixed  $value
      */
     public function offsetSet($offset, $value)
     {
@@ -331,7 +338,7 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
     /**
      * Determine if the given attribute exists
      *
-     * @param mixed $offset
+     * @param string $offset
      *
      * @return bool
      */
@@ -343,7 +350,7 @@ abstract class AbstractResource implements ResourceInterface, ArrayAccess
     /**
      * Unset the value for a given offset
      *
-     * @param mixed $offset
+     * @param string $offset
      */
     public function offsetUnset($offset)
     {

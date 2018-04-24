@@ -26,7 +26,6 @@ class AbstractResourceTest extends TestCase
         $this->abstractResource = new BasicStubResource($mel);
     }
 
-
     public function testShouldSaveAndReturnResourceAttributesDynamically()
     {
         $this->abstractResource->id = 42;
@@ -67,7 +66,7 @@ class AbstractResourceTest extends TestCase
 
         $currenciesArray = json_decode($this->getJsonFileContent('currencies/currencies-list'), true);
 
-        $collection = $this->abstractResource->hydrate($response);
+        $collection = $this->invokeProtectedMethod($this->abstractResource, 'hydrate', [$response]);
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertEquals(count($currenciesArray), $collection->size());
@@ -82,7 +81,7 @@ class AbstractResourceTest extends TestCase
 
         $currencyArray = json_decode($this->getJsonFileContent('currencies/single-currency'), true);
 
-        $collection = $this->abstractResource->hydrate($response);
+        $collection = $this->invokeProtectedMethod($this->abstractResource, 'hydrate', [$response]);
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertEquals(1, $collection->size());

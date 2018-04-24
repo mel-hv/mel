@@ -74,17 +74,4 @@ class UriGeneratorTest extends TestCase
 
         $this->assertEquals('https://api.mercadolibre.com?key1=value1&key2=value2', $uri->__toString());
     }
-
-    public function testShouldCreateUriUsingEndpointPathWithDynamicSegments()
-    {
-        $uri = $this->uriGenerator->resolveEndPointPath(
-            '/endpoint/{id}/path/{name}',
-            ['id' => 42, 'name' => 'nick'],
-            ['q' => 'query-value']
-        );
-
-        $expected = '/endpoint/42/path/nick?q=query-value';
-
-        $this->assertEquals($expected, $uri->__toString());
-    }
 }
