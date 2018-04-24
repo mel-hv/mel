@@ -8,8 +8,9 @@ use Mel\Collection\Collection;
 use Psr\Http\Message\ResponseInterface;
 use Stringy\Stringy;
 use ArrayAccess;
+use JsonSerializable;
 
-abstract class AbstractResource implements ArrayAccess
+abstract class AbstractResource implements ArrayAccess, JsonSerializable
 {
     /**
      * @var Mel Main container instance
@@ -355,5 +356,16 @@ abstract class AbstractResource implements ArrayAccess
     public function offsetUnset($offset)
     {
         unset($this->attributes[$offset]);
+    }
+
+    /**
+     * Specify data which should be serialized to JSON
+     *
+     * @link  http://php.net/manual/en/jsonserializable.jsonserialize.php
+     * @return mixed Data which can be serialized by json_encode()
+     */
+    public function jsonSerialize()
+    {
+       return $this->getAttributes();
     }
 }

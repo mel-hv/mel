@@ -35,7 +35,6 @@ class AbstractResourceTest extends TestCase
 
         unset($this->abstractResource->id);
         $this->assertFalse(isset($this->abstractResource->id));
-
     }
 
     public function testShouldSaveAndReturnAttributesUsingArrayAccess()
@@ -56,6 +55,14 @@ class AbstractResourceTest extends TestCase
 
         $this->assertInstanceOf(UriInterface::class, $this->abstractResource->permalink);
         $this->assertEquals($this->apiUri, $this->abstractResource->permalink_string);
+    }
+
+    public function testSerializeResourceInJsonString()
+    {
+        $this->abstractResource->id = 42;
+        $this->abstractResource->text = 'Text to test...';
+
+        $this->assertJsonStringEqualsJsonString('{"id":42,"text":"Text to test..."}', json_encode($this->abstractResource));
     }
 
     public function testShouldCreateACollectionUsingAHttpResponseWithMultiplesItems()

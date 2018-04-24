@@ -51,7 +51,7 @@ class QuestionTest extends TestCase
 
         $request = $this->mockClient->getLastRequest();
 
-        $this->assertEquals($searchData['total'], $searchResult->total);
+        $this->assertEquals($searchData, $searchResult->getAttributes());
 
         $this->assertEquals(
             $this->apiUri . 'questions/search?item=MLA608007087',
@@ -78,7 +78,7 @@ class QuestionTest extends TestCase
         $request = $this->mockClient->getLastRequest();
 
         $this->assertNotSame($question, $questionResult);
-        $this->assertEquals($questionData['id'], $questionResult->id);
+        $this->assertEquals($questionData, $questionResult->getAttributes());
 
         $this->assertEquals(
             $this->apiUri . 'questions/3957150025',
@@ -102,7 +102,7 @@ class QuestionTest extends TestCase
         $request = $this->mockClient->getLastRequest();
 
         $this->assertNotSame($question, $questionCreated);
-        $this->assertEquals($arrayUnanswered['id'], $questionCreated->id);
+        $this->assertEquals($arrayUnanswered, $questionCreated->getAttributes());
 
         $this->assertEquals('POST', $request->getMethod());
     }
@@ -123,7 +123,7 @@ class QuestionTest extends TestCase
         $request = $this->mockClient->getLastRequest();
 
         $this->assertNotSame($question, $questionCreated);
-        $this->assertEquals($arrayAnswered['id'], $questionCreated->id);
+        $this->assertEquals($arrayAnswered, $questionCreated->getAttributes());
 
         $this->assertEquals('POST', $request->getMethod());
     }

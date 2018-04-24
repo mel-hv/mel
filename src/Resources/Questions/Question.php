@@ -11,7 +11,7 @@ class Question extends AbstractResource
      *
      * @param $id
      *
-     * @return \Mel\Collection\Collection|mixed
+     * @return \Mel\Resources\Questions\Question
      * @throws \Http\Client\Exception
      */
     public function getById($id)
@@ -28,7 +28,7 @@ class Question extends AbstractResource
      *
      * @param $itemId
      *
-     * @return \Mel\Collection\\Collection|mixed
+     * @return \Mel\Resources\Questions\Question
      * @throws \Http\Client\Exception
      */
     public function searchByItem($itemId)
@@ -45,7 +45,7 @@ class Question extends AbstractResource
      *
      * @param array $params
      *
-     * @return \Mel\Collection\Collection|mixed
+     * @return \Mel\Resources\Questions\Question
      * @throws \Http\Client\Exception
      */
     public function create(array $params)
@@ -62,7 +62,7 @@ class Question extends AbstractResource
      *
      * @param array $params
      *
-     * @return \Mel\Collection\Collection|mixed
+     * @return \Mel\Resources\Questions\Question
      * @throws \Http\Client\Exception
      */
     public function answer(array $params)
